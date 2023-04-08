@@ -5,8 +5,8 @@ import numpy as np
 
 # used to control what color the camera should be looking, this interval can detect, say a yellow cone.
 #hopefully I can use a trained HaarCascadeClasifier xml for better tracking.
-low = np.array([255, 255, 0])
-high = np.array([255, 215, 0])
+low = np.array([128, 50, 12])
+high = np.array([255, 255, 255])
 # used to blur images if camera gets too close to object, matrix computes weighed average of each pixel by matrix multiplication
 #opencv tracks objects way better when image(s) are blurred
 #according to https://en.wikipedia.org/wiki/Kernel_(image_processing)
@@ -32,6 +32,8 @@ def getCoordinatesInches(contours):
 
 def run():
     cap = cv2.VideoCapture(0)
+    #detecting yellow requires higher exposure
+    cap.set(cv2.CAP_PROP_EXPOSURE, 0.5)
     while True:
         ret, frame = cap.read()
     #can use GaussianBlur function, but want to modify with matrix

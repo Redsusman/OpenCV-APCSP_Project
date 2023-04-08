@@ -4,11 +4,13 @@ import detectCube
 
 
 
-while True:
-    if key.is_pressed('u'):
-        detectCube.run()
-        break
-    elif key.is_pressed('o'):
-        detectCone.run()
-        break
+# while True:
+#     if key.is_pressed('u'):
+#         detectCube.run()
+#         break
+#     elif key.is_pressed('o'):
+#         detectCone.run()
+#         break
+
+detectCone.run()
 
