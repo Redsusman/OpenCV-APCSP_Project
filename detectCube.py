@@ -3,10 +3,14 @@ import numpy as np
 
 
 cap = cv2.VideoCapture(0)
+# used to control what color the camera should be looking, this interval can detect, say a purple cube
 low = np.array([128, 50, 128])
 high = np.array([255, 255, 255])
+# used to sharpen images if camera gets too close to object
+kernelMatrix = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
 
 
+# find the xy(later z) coordinates of an tracked object relative to the camera.
 def getCoordinatesInches(contours):
     array = []
     for i in contours:
@@ -21,6 +25,7 @@ def getCoordinatesInches(contours):
 
 while True:
     ret, frame = cap.read()
+    filter = cv2.filter2D(frame, -1, kernel=kernelMatrix)
     convert = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     range = cv2.inRange(convert, low, high)
     ret, threshold = cv2.threshold(range, 150, 200, cv2.THRESH_BINARY)
@@ -28,11 +33,9 @@ while True:
     contours, hierarchies = cv2.findContours(
         range, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
-    # cv2.drawContours(range, contours, -1, (255, 0, 0), 3)
-
-    for contour in contours:
-        (x, y, w, h) = cv2.boundingRect(contour)
-        if cv2.contourArea(contour) > 1000:
+    for i in contours:
+        (x, y, w, h) = cv2.boundingRect(i)
+        if cv2.contourArea(i) > 1000:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
     cv2.putText(frame, str(getCoordinatesInches(contours)), (255, 255),
