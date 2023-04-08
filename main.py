@@ -27,7 +27,7 @@ while True:
             center_x = int(moments["m10"]/moments["m00"])
             center_y = int(moments["m01"]/moments["m00"])
             array = [center_x/96, center_y/96]
-
+            
     print(array)
     face = face_cascade.detectMultiScale(convert, 1.1, 4)
 
@@ -37,6 +37,8 @@ while True:
     cv2.imshow("Frame", frame)
     if cv2.waitKey(1) == ord('q'):
         break
+    
+
 
 
 cap.release()
