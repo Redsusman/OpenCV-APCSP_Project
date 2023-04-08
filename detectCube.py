@@ -6,8 +6,15 @@ cap = cv2.VideoCapture(0)
 # used to control what color the camera should be looking, this interval can detect, say a purple cube
 low = np.array([128, 50, 128])
 high = np.array([255, 255, 255])
-# used to sharpen images if camera gets too close to object, matrix computes weighed average of each pixel by matrix multiplication
-kernelMatrix = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+# used to blur images if camera gets too close to object, matrix computes weighed average of each pixel by matrix multiplication
+#opencv tracks objects way better when image(s) are blurred
+#according to https://en.wikipedia.org/wiki/Kernel_(image_processing)
+#a 5*5 Gaussian matrix provides most blur
+kernelMatrix = np.multiply(1/256, np.array([[1, 4, 6, 4, 1], 
+                         [4, 16, 24, 16, 4], 
+                         [6, 24, 36, 24, 6], 
+                         [4, 16, 24, 16, 4], 
+                         [1, 4, 6, 4, 1]]))
 
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
@@ -25,8 +32,9 @@ def getCoordinatesInches(contours):
 
 while True:
     ret, frame = cap.read()
+    #can use GaussianBlur function, but want to modifty with matrix
     filter = cv2.filter2D(frame, -1, kernel=kernelMatrix)
-    convert = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
     range = cv2.inRange(convert, low, high)
     ret, threshold = cv2.threshold(range, 150, 200, cv2.THRESH_BINARY)
 
@@ -36,8 +44,10 @@ while True:
     for i in contours:
         (x, y, w, h) = cv2.boundingRect(i)
         if cv2.contourArea(i) > 175:
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+            cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
+    cv2.putText(filter, str(getCoordinatesInches(contours)), (255, 255),
+                cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
     cv2.putText(frame, str(getCoordinatesInches(contours)), (255, 255),
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
 
