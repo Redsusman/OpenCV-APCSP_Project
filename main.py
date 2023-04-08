@@ -1,45 +1,14 @@
-import cv2
-import numpy as np
+import keyboard as key
+import detectCone
+import detectCube
 
-cap = cv2.VideoCapture(0)
-face_cascade = cv2.CascadeClassifier(
-    "OpenCV-APCSP_Project/assets/haarcascade_frontalface_default.xml")
-
-startpoint = (5, 5)
-color = (255, 0, 0)
-CENTER = (255, 255)
-array = []
 
 
 while True:
-
-    ret,  frame = cap.read()
-    cv2.putText(frame, "hello world", (255, 255),
-                cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
-    convert = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    ret, threshold = cv2.threshold(convert, 150, 200, cv2.THRESH_BINARY)
-    contours, hierarchies = cv2.findContours(threshold, cv2.RETR_TREE,
-                                             cv2.CHAIN_APPROX_NONE)
-
-    for i in contours:
-        moments = cv2.moments(i)
-        if moments["m00"] != 0:
-            center_x = int(moments["m10"]/moments["m00"])
-            center_y = int(moments["m01"]/moments["m00"])
-            array = [center_x/96, center_y/96]
-            
-    print(array)
-    face = face_cascade.detectMultiScale(convert, 1.1, 4)
-
-    for (x, y, w, h) in face:
-        cv2.rectangle(frame, (x, y), (x+w, y + h), (255, 0, 0), 2)
-
-    cv2.imshow("Frame", frame)
-    if cv2.waitKey(1) == ord('q'):
+    if key.is_pressed('u'):
+        detectCube.run()
         break
-    
+    elif key.is_pressed('o'):
+        detectCone.run()
+        break
 
-
-
-cap.release()
-cv2.destroyAllWindows()

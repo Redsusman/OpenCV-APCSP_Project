@@ -3,10 +3,10 @@ import numpy as np
 
 
 
-# used to control what color the camera should be looking, this interval can detect, say a purple cube.
+# used to control what color the camera should be looking, this interval can detect, say a yellow cone.
 #hopefully I can use a trained HaarCascadeClasifier xml for better tracking.
-low = np.array([128, 50, 128])
-high = np.array([255, 255, 255])
+low = np.array([255, 255, 0])
+high = np.array([255, 215, 0])
 # used to blur images if camera gets too close to object, matrix computes weighed average of each pixel by matrix multiplication
 #opencv tracks objects way better when image(s) are blurred
 #according to https://en.wikipedia.org/wiki/Kernel_(image_processing)
@@ -52,7 +52,7 @@ def run():
         cv2.putText(filter, str(getCoordinatesInches(contours)), (255, 255),
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
 
-        cv2.imshow("cube video", filter)
+        cv2.imshow("cone video", filter)
 
         if cv2.waitKey(1) == ord('q'):
             break
