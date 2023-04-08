@@ -3,7 +3,8 @@ import numpy as np
 
 
 cap = cv2.VideoCapture(0)
-# used to control what color the camera should be looking, this interval can detect, say a purple cube
+# used to control what color the camera should be looking, this interval can detect, say a purple cube.
+#hopefully I can use a trained HaarCascadeClasifier xml for better tracking.
 low = np.array([128, 50, 128])
 high = np.array([255, 255, 255])
 # used to blur images if camera gets too close to object, matrix computes weighed average of each pixel by matrix multiplication
@@ -36,6 +37,7 @@ while True:
     filter = cv2.filter2D(frame, -1, kernel=kernelMatrix)
     convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
     range = cv2.inRange(convert, low, high)
+    #unused
     ret, threshold = cv2.threshold(range, 150, 200, cv2.THRESH_BINARY)
 
     contours, hierarchies = cv2.findContours(
@@ -48,10 +50,7 @@ while True:
 
     cv2.putText(filter, str(getCoordinatesInches(contours)), (255, 255),
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
-    cv2.putText(frame, str(getCoordinatesInches(contours)), (255, 255),
-                cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
 
-    cv2.imshow("frame", frame)
     cv2.imshow("sharped video", filter)
 
     if cv2.waitKey(1) == ord('q'):
