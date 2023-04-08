@@ -10,8 +10,15 @@ color = (255, 0, 0)
 CENTER = (255, 255)
 
 
-def getAngle(img):
-    return (x, y)
+def findCenterOfContours(y):
+    if len(y) > 1:
+        limit = int(len(y)/2)
+        for i in range(limit):
+            sum_x = sum(y[i][0])/limit
+            sum_y = sum(y[i][1])/limit
+
+    array = [sum_x, sum_y]
+    return array
 
 
 while True:
@@ -20,6 +27,11 @@ while True:
     cv2.putText(frame, "hello world", (255, 255),
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
     convert = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    ret, threshold = cv2.threshold(convert, 150, 200, cv2.THRESH_BINARY)
+    y = cv2.findContours(threshold, cv2.RETR_TREE,
+                         cv2.CHAIN_APPROX_NONE)
+    center = findCenterOfContours(y)
+
     face = face_cascade.detectMultiScale(convert, 1.1, 4)
 
     for (x, y, w, h) in face:
