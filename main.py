@@ -26,7 +26,7 @@ while True:
         if moments["m00"] != 0:
             center_x = int(moments["m10"]/moments["m00"])
             center_y = int(moments["m01"]/moments["m00"])
-            array = [center_x, center_y]
+            array = [center_x/96, center_y/96]
 
     print(array)
     face = face_cascade.detectMultiScale(convert, 1.1, 4)
