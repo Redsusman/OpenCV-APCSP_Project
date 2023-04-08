@@ -6,8 +6,8 @@ cap = cv2.VideoCapture(0)
 # used to control what color the camera should be looking, this interval can detect, say a purple cube
 low = np.array([128, 50, 128])
 high = np.array([255, 255, 255])
-# used to sharpen images if camera gets too close to object
-kernelMatrix = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
+# used to sharpen images if camera gets too close to object, matrix computes weighed average of each pixel by matrix multiplication
+kernelMatrix = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
 
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
@@ -35,13 +35,14 @@ while True:
 
     for i in contours:
         (x, y, w, h) = cv2.boundingRect(i)
-        if cv2.contourArea(i) > 1000:
+        if cv2.contourArea(i) > 175:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
     cv2.putText(frame, str(getCoordinatesInches(contours)), (255, 255),
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
 
     cv2.imshow("frame", frame)
+    cv2.imshow("sharped video", filter)
 
     if cv2.waitKey(1) == ord('q'):
         break
