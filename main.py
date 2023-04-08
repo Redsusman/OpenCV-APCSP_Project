@@ -8,17 +8,7 @@ face_cascade = cv2.CascadeClassifier(
 startpoint = (5, 5)
 color = (255, 0, 0)
 CENTER = (255, 255)
-
-
-def findCenterOfContours(y):
-    if len(y) > 1:
-        limit = int(len(y)/2)
-        for i in range(limit):
-            sum_x = sum(y[i][0])/limit
-            sum_y = sum(y[i][1])/limit
-
-    array = [sum_x, sum_y]
-    return array
+array = []
 
 
 while True:
@@ -28,10 +18,17 @@ while True:
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
     convert = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     ret, threshold = cv2.threshold(convert, 150, 200, cv2.THRESH_BINARY)
-    y = cv2.findContours(threshold, cv2.RETR_TREE,
-                         cv2.CHAIN_APPROX_NONE)
-    center = findCenterOfContours(y)
+    contours, hierarchies = cv2.findContours(threshold, cv2.RETR_TREE,
+                                             cv2.CHAIN_APPROX_NONE)
 
+    for i in contours:
+        moments = cv2.moments(i)
+        if moments["m00"] != 0:
+            center_x = int(moments["m10"]/moments["m00"])
+            center_y = int(moments["m01"]/moments["m00"])
+            array = [center_x, center_y]
+
+    print(array)
     face = face_cascade.detectMultiScale(convert, 1.1, 4)
 
     for (x, y, w, h) in face:
