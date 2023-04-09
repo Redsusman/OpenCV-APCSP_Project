@@ -33,9 +33,10 @@ def getCoordinatesInches(contours):
     for i in contours:
         moments = cv2.moments(i)
         if moments["m00"] != 0:
-            center_x = int(moments["m20"]/moments["m00"])
+            center_x = int(moments["m10"]/moments["m00"])
             center_y = int(moments["m01"]/moments["m00"])
-            array = [center_x/64, center_y/64]
+            center_distance = (center_y/64)/np.sin(np.radians(7))
+            array = [center_x/64, center_y/64, center_distance]
             return array
     return array
 
@@ -46,11 +47,12 @@ def run():
         ret, frame = cap.read()
     # can use GaussianBlur function, but want to modify with matrix
         contrast = cv2.convertScaleAbs(frame, 0, 1.25)
-        filter = cv2.filter2D(contrast, -1, kernel=kernelMatrix)
+        filter = cv2.GaussianBlur(contrast, (5,5), 0)
         convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
         range = cv2.inRange(convert, low, high)
         range = cv2.erode(range, erosionKernel, iterations=2)
         range = cv2.dilate(range, dilationKernel, iterations=2)
+        opening = cv2.morphologyEx(range, cv2.MORPH_OPEN, dilationKernel)
     # unused
         ret, threshold = cv2.threshold(range, 150, 200, cv2.THRESH_BINARY)
 
@@ -62,7 +64,7 @@ def run():
             if cv2.contourArea(i) > 150:
                 cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 10),
+        cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 100),
                     cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
 
         cv2.imshow("cube video", filter)

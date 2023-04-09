@@ -34,7 +34,8 @@ def getCoordinatesInches(contours):
         if moments["m00"] != 0:
             center_x = int(moments["m10"]/moments["m00"])
             center_y = int(moments["m01"]/moments["m00"])
-            array = [center_x/64, center_y/64]
+            center_distance = (center_y/64)/np.sin(np.radians(7))
+            array = [center_x/64, center_y/64, center_distance]
             return array
     return array
 
@@ -45,9 +46,9 @@ def run():
     cap.set(cv2.CAP_PROP_EXPOSURE, 0.5)
     while True:
         ret, frame = cap.read()
-        exposure = cv2.convertScaleAbs(frame, dst=0, alpha=1)
+        exposure = cv2.convertScaleAbs(frame, dst=0, alpha=1.25)
     # can use GaussianBlur function, but want to modify with matrix
-        filter = cv2.filter2D(exposure, -1, kernel=kernelMatrix)
+        filter = cv2.GaussianBlur(exposure, (5,5), 0)
         convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
         range = cv2.inRange(convert, low, high)
         range = cv2.erode(range, erosionKernel, iterations=2)
@@ -63,7 +64,7 @@ def run():
             if cv2.contourArea(i) > 175:
                 cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 10),
+        cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 50),
                     cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
 
         cv2.imshow("cone video", filter)
