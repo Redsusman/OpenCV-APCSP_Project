@@ -36,7 +36,8 @@ def run():
     while True:
         ret, frame = cap.read()
     #can use GaussianBlur function, but want to modify with matrix
-        filter = cv2.filter2D(frame, -1, kernel=kernelMatrix)
+        contrast = cv2.convertScaleAbs(frame, 0, 1.25)
+        filter = cv2.filter2D(contrast, -1, kernel=kernelMatrix)
         convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
         range = cv2.inRange(convert, low, high)
     #unused
@@ -47,10 +48,10 @@ def run():
 
         for i in contours:
             (x, y, w, h) = cv2.boundingRect(i)
-            if cv2.contourArea(i) > 175:
+            if cv2.contourArea(i) > 150:
                 cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        cv2.putText(filter, str(getCoordinatesInches(contours)), (255, 255),
+        cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 10),
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
 
         cv2.imshow("cube video", filter)
