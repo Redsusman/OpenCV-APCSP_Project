@@ -5,13 +5,14 @@ import numpy as np
 
 # used to control what color the camera should be looking, this interval can detect, say a yellow cone.
 #hopefully I can use a trained HaarCascadeClasifier xml for better tracking.
-low = np.array([128, 50, 12])
-high = np.array([255, 255, 255])
+low = np.array([0, 50, 200])
+high = np.array([50, 255, 255])
 # used to blur images if camera gets too close to object, matrix computes weighed average of each pixel by matrix multiplication
 #opencv tracks objects way better when image(s) are blurred
 #according to https://en.wikipedia.org/wiki/Kernel_(image_processing)
 #a 5*5 Gaussian matrix provides most blur
-kernelMatrix = np.multiply(1/256, np.array([[1, 4, 6, 4, 1], 
+kernelMatrix = np.multiply(1/256, np.array([
+                         [1, 4, 6, 4, 1], 
                          [4, 16, 24, 16, 4], 
                          [6, 24, 36, 24, 6], 
                          [4, 16, 24, 16, 4], 
@@ -36,8 +37,9 @@ def run():
     cap.set(cv2.CAP_PROP_EXPOSURE, 0.5)
     while True:
         ret, frame = cap.read()
+        exposure = cv2.convertScaleAbs(frame, dst=1.5, alpha=1.235)
     #can use GaussianBlur function, but want to modify with matrix
-        filter = cv2.filter2D(frame, -1, kernel=kernelMatrix)
+        filter = cv2.filter2D(exposure, -1, kernel=kernelMatrix)
         convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
         range = cv2.inRange(convert, low, high)
     #unused
@@ -55,9 +57,14 @@ def run():
                 cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
 
         cv2.imshow("cone video", filter)
+        # cv2.imshow("exposure", cv2.convertScaleAbs(filter, dst = 1.5, alpha=1.43))
 
         if cv2.waitKey(1) == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
+
+
+# def findClosestCone(list):
+#     return

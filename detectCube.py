@@ -11,7 +11,8 @@ high = np.array([255, 255, 255])
 #opencv tracks objects way better when image(s) are blurred
 #according to https://en.wikipedia.org/wiki/Kernel_(image_processing)
 #a 5*5 Gaussian matrix provides most blur
-kernelMatrix = np.multiply(1/256, np.array([[1, 4, 6, 4, 1], 
+kernelMatrix = np.multiply(1/256, np.array([
+                         [1, 4, 6, 4, 1], 
                          [4, 16, 24, 16, 4], 
                          [6, 24, 36, 24, 6], 
                          [4, 16, 24, 16, 4], 
@@ -59,3 +60,7 @@ def run():
 
     cap.release()
     cv2.destroyAllWindows()
+
+def findClosestCube(list):
+    return
+
