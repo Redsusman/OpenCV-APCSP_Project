@@ -16,14 +16,9 @@ kernelMatrix = np.multiply(1/256, np.array([
     [6, 24, 36, 24, 6],
     [4, 16, 24, 16, 4],
     [1, 4, 6, 4, 1]]))
-erosionKernel = np.array([
-    [1, 3, 7],
-    [3, 5, 9],
-    [5, 11, 13]])
 
-dilationKernel = np.array([[1, 5, 9],
-                           [5, 11, 14],
-                           [9, 5, 3]])
+
+dilationKernel = np.ones((5,5), np.uint8)
 
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
@@ -48,11 +43,10 @@ def run():
         ret, frame = cap.read()
         exposure = cv2.convertScaleAbs(frame, dst=0, alpha=1.25)
     # can use GaussianBlur function, but want to modify with matrix
-        filter = cv2.GaussianBlur(exposure, (5,5), 0)
+        filter = cv2.GaussianBlur(exposure, (5, 5), 0)
         convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
         range = cv2.inRange(convert, low, high)
-        range = cv2.erode(range, erosionKernel, iterations=2)
-        range = cv2.dilate(range, dilationKernel, iterations=2)
+        range = cv2.morphologyEx(range, cv2.MORPH_OPEN, dilationKernel)
     # unused
         ret, threshold = cv2.threshold(range, 150, 200, cv2.THRESH_BINARY)
 
