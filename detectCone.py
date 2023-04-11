@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import cameraCalibration as calib
 
 
 # used to control what color the camera should be looking, this interval can detect, say a yellow cone.
@@ -33,6 +34,12 @@ def getCoordinatesInches(contours):
             array = [center_x/64, center_y/64, center_distance]
             return array
     return array
+
+def distance(objectDimensions, focalLength_mm, objectImageSensor):
+    distanceInches = (objectDimensions * focalLength_mm/objectImageSensor)/25.4
+    cv2.solvePnP()
+    cv2.calibrateCamera()
+    return distanceInches
 
 
 def run():
@@ -71,5 +78,5 @@ def run():
     cv2.destroyAllWindows()
 
 
-# def findClosestCone(list):
-#     return
+def getPose():
+    return

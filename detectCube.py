@@ -34,6 +34,10 @@ def getCoordinatesInches(contours):
             return array
     return array
 
+def distance(objectDimensions, focalLength_mm, objectImageSensor):
+    distanceInches = (objectDimensions * focalLength_mm/objectImageSensor)/25.4
+    return distanceInches
+
 
 def run():
     cap = cv2.VideoCapture(0)
