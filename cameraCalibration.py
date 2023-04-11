@@ -19,7 +19,6 @@ gray = None
 files = glob.glob("./OpenCV-APCSP_Project/assets/iloveimg-resized/*.png")
 
 for file in files:
-    print(file)
     img = cv2.imread(file)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret, corners = cv2.findChessboardCorners(gray, Checkerboard, cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK + cv2.CALIB_CB_NORMALIZE_IMAGE)
@@ -29,25 +28,18 @@ for file in files:
         cornersTwo = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
         imagePoints.append(cornersTwo)
 
-        cv2.drawChessboardCorners(gray, Checkerboard, cornersTwo, ret)
-        cv2.imshow('img', img)
-        cv2.waitKey(0) 
-
 cv2.destroyAllWindows()
 
 
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objectPoints, imagePoints, gray.shape[::-1], None, None)
-print(mtx)
-print(dist)
-print(rvecs)
-print(tvecs)
 
-mean_error = 0
-for i in range(len(objectPoints)):
-    imgpoints2, _ = cv2.projectPoints(objectPoints[i], rvecs[i], tvecs[i], mtx, dist)
-    error = cv2.norm(imagePoints[i], imgpoints2, cv2.NORM_L2)/len(imgpoints2)
-    mean_error += error
-print( "total error: {}".format(mean_error/len(objectPoints)) )
+def getProjectionError():
+    mean_error = 0
+    for i in range(len(objectPoints)):
+        imgpoints2, _ = cv2.projectPoints(objectPoints[i], rvecs[i], tvecs[i], mtx, dist)
+        error = cv2.norm(imagePoints[i], imgpoints2, cv2.NORM_L2)/len(imgpoints2)
+        mean_error += error
+    print( "total error: {}".format(mean_error/len(objectPoints)) )
 
 
 # ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objectPoints, imagePoints, gray.shape[::-1], None, None)

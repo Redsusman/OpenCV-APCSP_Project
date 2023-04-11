@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import cameraCalibration as calib
 
 
 # used to control what color the camera should be looking, this interval can detect, say a purple cube.
@@ -20,6 +21,10 @@ kernelMatrix = np.multiply(1/256, np.array([
 
 dilationKernel = np.ones((5,5), np.uint8)
 
+mtx = calib.mtx
+dist = calib.dist
+tvecs = calib.tvecs
+rvecs = calib.rvecs
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
 def getCoordinatesInches(contours):
@@ -72,5 +77,7 @@ def run():
     cv2.destroyAllWindows()
 
 
-def findClosestCube(list):
-    return
+def getPose():
+    ret, rvec, tvec = cv2.solvePnP(None, None, mtx, dist)
+    return np.array([rvec, tvec])
+# make for loop that adds all avaliable poses from founded contours, sort through them to get closest pose

@@ -21,6 +21,10 @@ kernelMatrix = np.multiply(1/256, np.array([
 
 dilationKernel = np.ones((5,5), np.uint8)
 
+mtx = calib.mtx
+dist = calib.dist
+tvecs = calib.tvecs
+rvecs = calib.rvecs
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
 def getCoordinatesInches(contours):
@@ -79,4 +83,5 @@ def run():
 
 
 def getPose():
-    return
+    ret, rvec, tvec = cv2.solvePnP(None, None, mtx, dist)
+    return np.array([rvec, tvec])
