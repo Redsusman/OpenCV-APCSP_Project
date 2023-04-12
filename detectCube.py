@@ -18,6 +18,9 @@ kernelMatrix = np.multiply(1/256, np.array([
     [4, 16, 24, 16, 4],
     [1, 4, 6, 4, 1]]))
 
+cubePointsInches = np.array([(0,0,0), (0, 9.5, 0), (9.5, 9.5, 0), (9.5, 0, 0)])
+
+
 
 dilationKernel = np.ones((5,5), np.uint8)
 
@@ -43,6 +46,13 @@ def distance(objectDimensions, focalLength_mm, objectImageSensor):
     distanceInches = (objectDimensions * focalLength_mm/objectImageSensor)/25.4
     return distanceInches
 
+def getPose(largest_contour):
+    (x,y,w,h) = cv2.boundingRect(largest_contour)
+    imagePoints = np.array([(x,y), (x, y+h), (x+w,y+h), (x+w, y)], dtype=np.float32)
+    ret, rvec, tvec = cv2.solvePnP(cubePointsInches, imagePoints, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
+    rvec, _ = cv2.Rodrigues(rvec)
+    return rvec, tvec
+
 
 def run():
     cap = cv2.VideoCapture(0)
@@ -57,16 +67,26 @@ def run():
     # unused
         ret, threshold = cv2.threshold(range, 150, 200, cv2.THRESH_BINARY)
 
-        contours, hierarchies = cv2.findContours(
+        contours, _ = cv2.findContours(
             range, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
         for i in contours:
             (x, y, w, h) = cv2.boundingRect(i)
             if cv2.contourArea(i) > 150:
                 cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        
+        if contours or len(contours) > 0:
+            large_contour = max(contours, key=cv2.contourArea)
+            pose = getPose(large_contour)
+            cv2.putText(filter, str(pose), (100, 100),
+                    cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+            print(pose)
 
         cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 100),
                     cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+        
+       
+        
 
         cv2.imshow("cube video", filter)
 
@@ -77,7 +97,4 @@ def run():
     cv2.destroyAllWindows()
 
 
-def getPose():
-    ret, rvec, tvec = cv2.solvePnP(None, None, mtx, dist)
-    return np.array([rvec, tvec])
-# make for loop that adds all avaliable poses from founded contours, sort through them to get closest pose
+

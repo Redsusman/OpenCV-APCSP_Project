@@ -82,6 +82,14 @@ def run():
     cv2.destroyAllWindows()
 
 
-def getPose():
-    ret, rvec, tvec = cv2.solvePnP(None, None, mtx, dist)
+def getPose(image):
+    array = []
+    objectPoints = np.array([getCoordinatesInches()[0], getCoordinatesInches()[1], getCoordinatesInches()[2]])
+    contours, hierarchies = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
+    for i in contours:
+        (x,y) = cv2.boundingRect(i)
+        array.append((x,y))
+
+    ret, rvec, tvec = cv2.solvePnP(objectPoints, array, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
     return np.array([rvec, tvec])
