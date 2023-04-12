@@ -99,18 +99,17 @@ def run():
         if contours or len(contours) > 0:
             large_contour = max(contours, key=cv2.contourArea)
             pose = getPose(large_contour)
-            cv2.putText(filter, str(pose), (100, 100),
-                    cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+            cv2.putText(filter, str(pose[1]), (100, 100),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             # print(pose[1])
             imagePoints, jacobian = cv2.projectPoints(cubePointsInches, pose[0], pose[1], mtx, dist)
-            print(type(imagePoints[0]))
             # draw(filter, large_contour, imagePoints)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             # draw_axis(filter, large_contour)
             
 
-        cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 100),
-                    cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+        # cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 100),
+        #             cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
         
         cv2.imshow("cube video", filter)
 
