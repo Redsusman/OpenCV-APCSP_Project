@@ -92,7 +92,8 @@ def run():
             # print(pose[1])
             imagePoints, jacobian = cv2.projectPoints(cubePointsInches, pose[0], pose[1], mtx, dist)
             print(type(imagePoints[0]))
-            draw(filter, large_contour, imagePoints)
+            # draw(filter, large_contour, imagePoints)
+            cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 10, 10)
             
 
         cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 100),
