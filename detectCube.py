@@ -53,6 +53,15 @@ def getPose(largest_contour):
     rvec, _ = cv2.Rodrigues(rvec)
     return rvec, tvec
 
+def draw(img, largest_contour, imgpts):
+    (x,y,w,h) = cv2.boundingRect(largest_contour)
+    pt1 = (int(x),int(y))
+    pt1 = np.ravel(pt1)
+    # pt1 = tuple(pt1.ravel())
+    img = cv2.line(img, pt1, tuple(imgpts[0].astype(int).ravel()), (255,0, 0), 5)
+    img = cv2.line(img, pt1, tuple(imgpts[1].astype(int).ravel()), (255, 0, 0), 5)
+    img = cv2.line(img, pt1, tuple(imgpts[2].astype(int).ravel()), (255, 0, 0), 5)
+    return img
 
 def run():
     cap = cv2.VideoCapture(0)
@@ -80,14 +89,15 @@ def run():
             pose = getPose(large_contour)
             cv2.putText(filter, str(pose), (100, 100),
                     cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
-            print(pose)
+            # print(pose[1])
+            imagePoints, jacobian = cv2.projectPoints(cubePointsInches, pose[0], pose[1], mtx, dist)
+            print(type(imagePoints[0]))
+            draw(filter, large_contour, imagePoints)
+            
 
         cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 100),
                     cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
         
-       
-        
-
         cv2.imshow("cube video", filter)
 
         if cv2.waitKey(1) == ord('q'):
