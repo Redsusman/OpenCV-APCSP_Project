@@ -31,7 +31,10 @@ large_contour = max(contours, key=cv2.contourArea)
 (x, y, w, h) = cv2.boundingRect(large_contour)
 cv2.rectangle(img, (x,y), (x+w, y+h), (255,0,0),2)
 
+pose = getPose(large_contour)
 cv2.putText(img, str(getPose(large_contour)), (0, 10), cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 0, 0), 1)
+
+cv2.drawFrameAxes(img, mtx, dist, pose[0], pose[1], 1, 10)
 
 cv2.imshow("img", img)
 cv2.waitKey(0)
