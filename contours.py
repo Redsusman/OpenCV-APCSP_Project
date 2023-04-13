@@ -10,7 +10,7 @@ axis = np.float32([[0,0,0], [0,9.5,0], [9.5,9.5,0], [9.5,0,0],
                    [0,0,0],[0,0,0],[0,0,0],[0,0,0] ])
 
 axisTwo = axis = np.float32([[0,0,0], [0,9.5,0], [9.5,9.5,0], [9.5,0,0],
-                   [0,0,-9.5],[0,9.5, -9.5],[9.5, 9.5,-9.5],[9,5,0,-9.5] ])
+                   [0,0,-9.5],[0,9.5, -9.5],[9.5, 9.5,-9.5],[9.5,0,-9.5] ])
 
 mtx = calib.mtx
 dist = calib.dist
@@ -36,7 +36,7 @@ def draw(img, corners, imgpts):
     return img
    
 
-img = cv2.imread("OpenCV-APCSP_Project/assets/cube.jpeg")
+img = cv2.imread("OpenCV-APCSP_Project/assets/conea.png")
 convert = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 mask = cv2.inRange(convert, low, high)
 
@@ -49,11 +49,11 @@ cv2.rectangle(img, (x,y), (x+w, y+h), (255,0,0),2)
 pose = getPose(large_contour)
 cv2.putText(img, str(getPose(large_contour)), (0, 10), cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 0, 0), 1)
 
-imagePoints, jacobian = cv2.projectPoints(axis, pose[0], pose[1], mtx, dist)
+imagePoints, jacobian = cv2.projectPoints(axisTwo, pose[0], pose[1], mtx, dist)
 
 cv2.drawFrameAxes(img, mtx, dist, pose[0], pose[1], 1, 10)
 
-draw(img, axis, imagePoints)
+draw(img, axisTwo, imagePoints)
 
 cv2.imshow("img", img)
 cv2.waitKey(0)
