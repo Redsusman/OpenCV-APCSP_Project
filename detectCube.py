@@ -52,36 +52,11 @@ def getPose(largest_contour):
     rvec, _ = cv2.Rodrigues(rvec)
     return rvec, tvec
 
-def draw(img, largest_contour, imgpts):
-    (x,y,w,h) = cv2.boundingRect(largest_contour)
-    pt1 = (int(x),int(y))
-    pt1 = np.ravel(pt1)
-    # pt1 = tuple(pt1.ravel())
-    img = cv2.line(img, pt1, tuple(imgpts[0].astype(int).ravel()), (255,0, 0), 5)
-    img = cv2.line(img, pt1, tuple(imgpts[1].astype(int).ravel()), (255, 0, 0), 5)
-    img = cv2.line(img, pt1, tuple(imgpts[2].astype(int).ravel()), (255, 0, 0), 5)
-    return img
-
-def draw_axis(img, largest_contour):
-    # unit is mm
-    pose = getPose(largest_contour)
-    rot = pose[0]
-    trans = pose[1]
-    points = np.float32([[0,0,0], [0, 9.5, 0], [9.5, 9.5, 0], [9.5, 0, 0]]).reshape(-1, 3)
-    imagePoints, _ = cv2.projectPoints(points, rot, trans, mtx, dist)
-    img = cv2.line(img, tuple(imagePoints[3].astype(int).ravel()), tuple(imagePoints[0].astype(int).ravel()), (255,0,0), 3)
-    img = cv2.line(img, tuple(imagePoints[3].astype(int).ravel()), tuple(imagePoints[1].astype(int).ravel()), (0,255,0), 3)
-    img = cv2.line(img, tuple(imagePoints[3].astype(int).ravel()), tuple(imagePoints[2].astype(int).ravel()), (0,0,255), 3)
-    return img
-
 def drawBox(img, corners, imgpts):
     imgpts = np.int32(imgpts).reshape(-1,2)
-    # draw ground floor in green
     img = cv2.drawContours(img, [imgpts[:4]],-1,(0,255,0),-3)
-    # draw pillars in blue color
     for i,j in zip(range(4),range(4,8)):
         img = cv2.line(img, tuple(imgpts[i]), tuple(imgpts[j]),(255),3)
-    # draw top layer in red color
     img = cv2.drawContours(img, [imgpts[4:]],-1,(0,0,255),3)
     return img
 
@@ -96,8 +71,6 @@ def run():
         range = cv2.inRange(convert, low, high)
         range = cv2.morphologyEx(range, cv2.MORPH_OPEN, dilationKernel)
     # unused
-        ret, threshold = cv2.threshold(range, 150, 200, cv2.THRESH_BINARY)
-
         contours, _ = cv2.findContours(
             range, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
@@ -114,7 +87,6 @@ def run():
                     cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             # print(pose[1])
             imagePoints, jacobian = cv2.projectPoints(axis, pose[0], pose[1], mtx, dist)
-            draw(filter, large_contour, imagePoints)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, imagePoints)
             
