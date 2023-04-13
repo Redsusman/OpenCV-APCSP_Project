@@ -88,7 +88,9 @@ def run():
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, imagePoints)
             
+            
         cv2.imshow("cube video", filter)
+        cv2.imshow("cube videoo", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break
