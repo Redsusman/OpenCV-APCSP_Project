@@ -19,8 +19,7 @@ kernelMatrix = np.multiply(1/256, np.array([
     [1, 4, 6, 4, 1]]))
 
 cubePointsInches = np.array([(0,0,0), (0, 9.5, 0), (9.5, 9.5, 0), (9.5, 0, 0)])
-
-
+axis = np.float32([[0,0,0], [0,9.5,0], [9.5,9.5,0], [9.5,0,0],[0,0,-9.5],[0,9.5, -9.5],[9.5, 9.5,-9.5],[9.5,0,-9.5]])
 
 dilationKernel = np.ones((5,5), np.uint8)
 
@@ -75,6 +74,17 @@ def draw_axis(img, largest_contour):
     img = cv2.line(img, tuple(imagePoints[3].astype(int).ravel()), tuple(imagePoints[2].astype(int).ravel()), (0,0,255), 3)
     return img
 
+def drawBox(img, corners, imgpts):
+    imgpts = np.int32(imgpts).reshape(-1,2)
+    # draw ground floor in green
+    img = cv2.drawContours(img, [imgpts[:4]],-1,(0,255,0),-3)
+    # draw pillars in blue color
+    for i,j in zip(range(4),range(4,8)):
+        img = cv2.line(img, tuple(imgpts[i]), tuple(imgpts[j]),(255),3)
+    # draw top layer in red color
+    img = cv2.drawContours(img, [imgpts[4:]],-1,(0,0,255),3)
+    return img
+
 def run():
     cap = cv2.VideoCapture(0)
     while True:
@@ -99,12 +109,14 @@ def run():
         if contours or len(contours) > 0:
             large_contour = max(contours, key=cv2.contourArea)
             pose = getPose(large_contour)
-            cv2.putText(filter, str(pose[1]), (100, 100),
+            cv2.putText(filter, str(pose), (100, 100),
                     cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             # print(pose[1])
-            imagePoints, jacobian = cv2.projectPoints(cubePointsInches, pose[0], pose[1], mtx, dist)
-            # draw(filter, large_contour, imagePoints)
+            imagePoints, jacobian = cv2.projectPoints(axis, pose[0], pose[1], mtx, dist)
+            draw(filter, large_contour, imagePoints)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
+            drawBox(filter, axis, imagePoints)
+            
             # draw_axis(filter, large_contour)
             
 
