@@ -5,7 +5,8 @@ import math
 array = np.array([(1, 3), (5, 4)], dtype=np.float32)
 
 # generate a linear trajectory from a set of points using polynomial regression
-def generateLinearTrajectory(points):
+# specify the speed to drive along the trajectory
+def generateLinearTrajectory(points, speed):
     secondList = points
     x = [secondList[i][0] for i in range(len(secondList))]
     y = [points[i][1] for i in range(len(points))]
