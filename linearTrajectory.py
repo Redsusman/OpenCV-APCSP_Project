@@ -9,8 +9,10 @@ def generateLinearTrajectory(points, speed):
     x = [secondList[i][0] for i in range(len(secondList))]
     y = [points[i][1] for i in range(len(points))]
     a, b = np.polyfit(x, y, 1)
+    theta = np.degrees(np.arctan(a))
+    secondTheta = 90 - theta
     print(a,"x+", b)
-    return a,b
+    return a,b,theta,secondTheta
 
 #generate parabolic trajectories from an acceleration value, speeds are automatically calculated
 def generateSplineTrajectory(points, speed):
