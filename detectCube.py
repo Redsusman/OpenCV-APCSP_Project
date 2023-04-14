@@ -46,6 +46,7 @@ def distance(objectDimensions, focalLength_mm, objectImageSensor):
     return distanceInches
 
 def getPose(largest_contour):
+    #convert to inches instead of cm
     (x,y,w,h) = cv2.boundingRect(largest_contour)
     imagePoints = np.array([(x,y), (x, y+h), (x+w,y+h), (x+w, y)], dtype=np.float32)
     ret, rvec, tvec = cv2.solvePnP(cubePointsInches, imagePoints, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
@@ -90,13 +91,18 @@ def run():
             
             
         cv2.imshow("cube video", filter)
-        cv2.imshow("cube videoo", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
+
+
+def optimizeTracking():
+    filter = cv2.KalmanFilter(4, 2, 3)
+
+    
 
 
 
