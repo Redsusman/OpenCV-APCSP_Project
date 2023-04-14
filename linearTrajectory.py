@@ -2,8 +2,6 @@ import matplotlib.pyplot as plot
 import numpy as np
 import math
 
-array = np.array([(1, 3), (5, 4)], dtype=np.float32)
-
 # generate a linear trajectory from a set of points using polynomial regression
 # specify the speed to drive along the trajectory
 def generateLinearTrajectory(points, speed):
@@ -14,11 +12,7 @@ def generateLinearTrajectory(points, speed):
     print(a,"x+", b)
     return a,b
 
-generateLinearTrajectory(array)
-
-
-# generate parabolic trajectories from an acceleration value, speeds are automatically calculated
-
+#generate parabolic trajectories from an acceleration value, speeds are automatically calculated
 def generateSplineTrajectory(points, speed):
     return
 
