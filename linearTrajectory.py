@@ -4,7 +4,7 @@ import math
 
 # generate a linear trajectory from a set of points using polynomial regression
 # specify the speed to drive along the trajectory
-def generateLinearTrajectory(points, speed):
+def generateLinearTrajectory(points):
     secondList = points
     x = [secondList[i][0] for i in range(len(secondList))]
     y = [points[i][1] for i in range(len(points))]
