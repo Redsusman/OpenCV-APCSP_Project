@@ -77,7 +77,7 @@ def run():
         ret, frame = cap.read()
     # can use GaussianBlur function, but want to modify with matrix
         contrast = cv2.convertScaleAbs(frame, 0, 1.25)
-        filter = cv2.GaussianBlur(contrast, (5, 5), 0)
+        filter = cv2.GaussianBlur(contrast, (11,11), 0)
         convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
         range = cv2.inRange(convert, low, high)
         range = cv2.morphologyEx(range, cv2.MORPH_OPEN, dilationKernel)
@@ -93,7 +93,9 @@ def run():
         if contours or len(contours) > 0:
             large_contour = max(contours, key=cv2.contourArea)
             pose = getPose(large_contour)
-            cv2.putText(filter, str(pose[1]/2.54), (100, 100),
+            cv2.putText(filter, str(pose[1]/2.54), (50, 100),
+                        cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
+            cv2.putText(filter, str(pose[0]), (50, 200),
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
