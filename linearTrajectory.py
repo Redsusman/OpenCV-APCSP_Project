@@ -4,7 +4,16 @@ import math
 
 # generate a linear trajectory from a set of points using polynomial regression
 # specify the speed to drive along the trajectory
+array = np.array([(1, 3), (5, 7)])
 def generateLinearTrajectory(points):
+    x, y = zip(*points)
+    a, b = np.polyfit(x, y, 1)
+    theta = np.degrees(np.arctan(a))
+    secondTheta = 90 - theta
+    print(a, "x +", b)
+    return a, b, theta, secondTheta
+
+def generateLinearTrajectoryComplex(points):
     secondList = points
     x = [secondList[i][0] for i in range(len(secondList))]
     y = [points[i][1] for i in range(len(points))]
@@ -13,6 +22,8 @@ def generateLinearTrajectory(points):
     secondTheta = 90 - theta
     print(a,"x+", b)
     return a,b,theta,secondTheta
+
+generateLinearTrajectory(array)
 
 #generate parabolic trajectories from an acceleration value, speeds are automatically calculated
 def generateSplineTrajectory(points, speed):
