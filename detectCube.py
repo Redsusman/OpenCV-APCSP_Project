@@ -132,7 +132,8 @@ def correctRotation(rvec):
 
     kalman_filter.predict()
     estimate = kalman_filter.correct(rvec)
-    rvec = cv2.Rodrigues(rvec)
+    estimate = cv2.Rodrigues(estimate)
+    estimate.reshape(-1, 3)
     return estimate
 
 
