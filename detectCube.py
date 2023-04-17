@@ -112,5 +112,13 @@ def run():
     cv2.destroyAllWindows()
 
 
-def optimizeTracking():
-    filter = cv2.KalmanFilter(4, 2, 3)
+def correctRotation(rvec):
+    rvec_single = rvec.ravel()
+    kalman_filter = cv2.KalmanFilter(4,4)
+    kalman_filter.measurmentMatrix = 0
+    kalman_filter.transistionMatrix = 0
+    kalman_filter.processNoiseCov = 0
+    
+    kalman_filter.predict()
+    estimate = kalman_filter.correct(rvec)
+    return estimate
