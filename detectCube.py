@@ -101,6 +101,7 @@ def run():
                 axis, pose[0], pose[1], mtx, dist)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, imagePoints)
+            print([np.degrees(angle) for angle in pose[0]])
 
         cv2.imshow("cube video", filter)
 
