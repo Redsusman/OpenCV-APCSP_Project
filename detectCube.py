@@ -113,27 +113,54 @@ def run():
 
 
 # correct for wrong rotation brought on by limitations of perspective n'perspective model (flipped rvec signs)
+
 def correctRotation(rvec):
     rvec_single = rvec.ravel()
-    kalman_filter = cv2.KalmanFilter(3, 7)
-    # describe three rotations along three axes.
-    matrix = np.zeros(5, 5)
-    kalman_filter.measurmentMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]], np.float32)
+    kalman_filter = cv2.KalmanFilter(7, 3)
 
-    kalman_filter.transistionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0],
-                                                [0, 1, 0, 1, 0, 0, 0],
-                                                [0, 0, 1, 0, 0, 0, 0],
-                                                [0, 0, 0, 1, 0, 0, 0],
-                                                [0, 0, 0, 0, 1, 0, 0],
-                                                [0, 0, 0, 0, 0, 1, 0],
-                                                [0, 0, 0, 0, 0, 0, 1]])
-    
-    kalman_filter.processNoiseCov = cv2.setIdentity()
+    # describe three rotations along three axes.
+    kalman_filter.measurementMatrix = np.array([[1, 0, 0],
+                                                [0, 1, 0],
+                                                [0, 0, 1]], np.float32)
+
+    kalman_filter.transitionMatrix = np.array([[1, 0, 0, 1, 0, 0, 0],
+                                               [0, 1, 0, 0, 1, 0, 0],
+                                               [0, 0, 1, 0, 0, 1, 0],
+                                               [0, 0, 0, 1, 0, 0, 0],
+                                               [0, 0, 0, 0, 1, 0, 0],
+                                               [0, 0, 0, 0, 0, 1, 0],
+                                               [0, 0, 0, 0, 0, 0, 1]])
+
+    kalman_filter.processNoiseCov = cv2.setIdentity(7, 7) * 1e-5
 
     kalman_filter.predict()
-    estimate = kalman_filter.correct(rvec)
-    estimate = cv2.Rodrigues(estimate)
-    estimate.reshape(-1, 3)
-    return estimate
+    estimate = kalman_filter.correct(rvec_single)
+
+    # Convert Rodrigues vector to rotation matrix
+    rot_matrix, _ = cv2.Rodrigues(estimate)
+    return rot_matrix
+
+# def correctRotation(rvec):
+#     rvec_single = rvec.ravel()
+#     kalman_filter = cv2.KalmanFilter(3, 7)
+#     # describe three rotations along three axes.
+#     matrix = np.zeros(5, 5)
+#     kalman_filter.measurmentMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]], np.float32)
+
+#     kalman_filter.transistionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0],
+#                                                 [0, 1, 0, 1, 0, 0, 0],
+#                                                 [0, 0, 1, 0, 0, 0, 0],
+#                                                 [0, 0, 0, 1, 0, 0, 0],
+#                                                 [0, 0, 0, 0, 1, 0, 0],
+#                                                 [0, 0, 0, 0, 0, 1, 0],
+#                                                 [0, 0, 0, 0, 0, 0, 1]])
+    
+#     kalman_filter.processNoiseCov = cv2.setIdentity()
+
+#     kalman_filter.predict()
+#     estimate = kalman_filter.correct(rvec)
+#     estimate = cv2.Rodrigues(estimate)
+#     estimate.reshape(-1, 3)
+#     return estimate
 
 
