@@ -114,11 +114,19 @@ def run():
 
 def correctRotation(rvec):
     rvec_single = rvec.ravel()
-    kalman_filter = cv2.KalmanFilter(4,4)
-    kalman_filter.measurmentMatrix = 0
-    kalman_filter.transistionMatrix = 0
+    kalman_filter = cv2.KalmanFilter(3, 7)
+    # describe three rotations along three axes.
+    kalman_filter.measurmentMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]], np.float32)
+    kalman_filter.transistionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0],
+                                                [0, 1, 0, 1, 0, 0, 0],
+                                                [0, 0, 1, 0, 0, 0, 0],
+                                                [0, 0, 0, 1, 0, 0, 0],
+                                                [0, 0, 0, 0, 1, 0, 0],
+                                                [0, 0, 0, 0, 0, 1, 0],
+                                                [0, 0, 0, 0, 0, 0, 1]])
     kalman_filter.processNoiseCov = 0
-    
+
     kalman_filter.predict()
     estimate = kalman_filter.correct(rvec)
+    rvec = cv2.Rodrigues(rvec)
     return estimate
