@@ -77,7 +77,7 @@ def run():
         ret, frame = cap.read()
     # can use GaussianBlur function, but want to modify with matrix
         contrast = cv2.convertScaleAbs(frame, 0, 1.25)
-        filter = cv2.GaussianBlur(contrast, (11,11), 0)
+        filter = cv2.GaussianBlur(contrast, (11, 11), 0)
         convert = cv2.cvtColor(filter, cv2.COLOR_BGR2HSV)
         range = cv2.inRange(convert, low, high)
         range = cv2.morphologyEx(range, cv2.MORPH_OPEN, dilationKernel)
@@ -115,9 +115,9 @@ def run():
 
 def correctRotation(rvec):
     rvec = rvec.astype(np.float32)
-    rvec = rvec.reshape(-1, 3)
-    kalman_filter = cv2.KalmanFilter(9,3,0)
-    
+    rvec = rvec.reshape(3, 1)
+    kalman_filter = cv2.KalmanFilter(9, 3, 0)
+
     kalman_filter.measurementMatrix = np.eye(3, dtype=np.float32)
 
     kalman_filter.transitionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -131,18 +131,19 @@ def correctRotation(rvec):
                                                [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
 
     kalman_filter.processNoiseCov = np.eye(9, dtype=np.float32)
-    
+    kalman_filter.measurementNoiseCov = np.eye(3, dtype=np.float32)
+
     cv2.setIdentity(kalman_filter.measurementMatrix)
     cv2.setIdentity(kalman_filter.processNoiseCov, 1e-5)
     cv2.setIdentity(kalman_filter.measurementNoiseCov, 1e-1)
     cv2.setIdentity(kalman_filter.errorCovPost, 1)
 
-    kalman_filter.predict()
-    estimate = kalman_filter.correct(rvec)
-    estimate = estimate.astype(np.float32)
-    estimate = estimate.reshape(-1, 3)
+    kalman_filter.correct(rvec)
+    prediction = kalman_filter.predict()
 
-    rot_matrix, _ = cv2.Rodrigues(estimate)
+    final_estimate = prediction[:3, :3]
+
+    final_estimate = final_estimate.astype(np.float32)
+
+    rot_matrix, _ = cv2.Rodrigues(final_estimate)
     return rot_matrix
-
-
