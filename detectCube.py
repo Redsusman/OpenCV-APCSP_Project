@@ -115,7 +115,7 @@ def run():
 
 def correctRotation(rvec):
     rvec = rvec.astype(np.float32)
-    rvec = rvec.reshape(3, 1)
+    # rvec = rvec.reshape(3, 3)
     kalman_filter = cv2.KalmanFilter(9, 3, 0)
 
     kalman_filter.measurementMatrix = np.eye(3, dtype=np.float32)
@@ -129,6 +129,8 @@ def correctRotation(rvec):
                                                [0, 0, 0, 0, 0, 0, 1, 0, 0],
                                                [0, 0, 0, 0, 0, 0, 0, 1, 0],
                                                [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
+    
+    
 
     kalman_filter.processNoiseCov = np.eye(9, dtype=np.float32)
     kalman_filter.measurementNoiseCov = np.eye(3, dtype=np.float32)
@@ -138,12 +140,18 @@ def correctRotation(rvec):
     cv2.setIdentity(kalman_filter.measurementNoiseCov, 1e-1)
     cv2.setIdentity(kalman_filter.errorCovPost, 1)
 
-    kalman_filter.correct(rvec)
+
+    
+    kalman_filter.correct(rvec.flatten())
+    
     prediction = kalman_filter.predict()
 
     final_estimate = prediction[:3, :3]
+
+    final_estimate = final_estimate.reshape(3,3)
 
     final_estimate = final_estimate.astype(np.float32)
 
     rot_matrix, _ = cv2.Rodrigues(final_estimate)
     return rot_matrix
+
