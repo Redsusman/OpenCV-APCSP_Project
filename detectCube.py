@@ -118,8 +118,6 @@ def correctRotation(rvec):
     rvec = rvec.reshape(-1, 3)
     kalman_filter = cv2.KalmanFilter(9,3,0)
     
-
-    # describe three rotations along three axes.
     kalman_filter.measurementMatrix = np.eye(3, dtype=np.float32)
 
     kalman_filter.transitionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0, 0, 0],
