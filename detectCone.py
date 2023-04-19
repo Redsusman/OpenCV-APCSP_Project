@@ -54,6 +54,14 @@ def getPose(contours):
     rvec, _ = cv2.Rodrigues(rvec)
     return rvec, tvec
 
+def getContourCorners(contours):
+    imagePoints = np.array([], dtype=np.float32)
+    for i, j in zip(range(0, len(contours)), range(1, len(contours))):
+       imagePoints = np.append(imagePoints, cv2.intersectConvexConvex(contours[i], contours[j]))
+    return imagePoints
+           
+       
+
 
 def run():
     cap = cv2.VideoCapture(0)
