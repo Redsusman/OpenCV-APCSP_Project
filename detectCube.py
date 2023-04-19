@@ -127,14 +127,24 @@ def correctRotation(measurement, tvec, cap):
         measurement = measurement.astype(np.float32)
         measurementMatrix = np.eye(3,9, dtype=np.float32)
         transitionMatrix = np.array([[1, 0, dt, 0, 0, 0, 0, 0, 0],
-                                 [0, 1, 0, dt, 0, 0, 0, 0, 0],
-                                 [0, 0, 1, 0, 0, 0, 0, 0, 0],
-                                 [0, 0, 0, 1, 0, 0, 0, 0, 0],
-                                 [0, 0, 0, 0, 1, 0, 0, 0, 0],
-                                 [0, 0, 0, 0, 0, 1, 0, 0, 0],
-                                 [0, 0, 0, 0, 0, 0, 1, 0, 0],
-                                 [0, 0, 0, 0, 0, 0, 0, 1, 0],
-                                 [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
+                             [0, 1, 0, dt, 0, 0, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 1, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 1, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, np.cos(dt), -np.sin(dt), 0],
+                             [0, 0, 0, 0, 0, 0, np.sin(dt), np.cos(dt), 0],
+                             [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
+        
+        # transitionMatrix = np.array([[1, 0, dt, 0, 0, 0, 0, 0, 0],
+        #                          [0, 1, 0, dt, 0, 0, 0, 0, 0],
+        #                          [0, 0, 1, 0, 0, 0, 0, 0, 0],
+        #                          [0, 0, 0, 1, 0, 0, 0, 0, 0],
+        #                          [0, 0, 0, 0, 1, 0, 0, 0, 0],
+        #                          [0, 0, 0, 0, 0, 1, 0, 0, 0],
+        #                          [0, 0, 0, 0, 0, 0, 1, 0, 0],
+        #                          [0, 0, 0, 0, 0, 0, 0, 1, 0],
+        #                          [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
 
         processNoiseCov = np.eye(9, dtype=np.float32) * 1e-5
         measurementNoiseCov = np.eye(3, dtype=np.float32) * 1e-1
