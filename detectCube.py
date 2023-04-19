@@ -32,7 +32,6 @@ rvecs = calib.rvecs
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
 
-
 def getCoordinatesInches(contours):
     array = []
     for i in contours:
@@ -45,11 +44,9 @@ def getCoordinatesInches(contours):
             return array
     return array
 
-
 def distance(objectDimensions, focalLength_mm, objectImageSensor):
     distanceInches = (objectDimensions * focalLength_mm/objectImageSensor)/25.4
     return distanceInches
-
 
 def getPose(largest_contour):
     # convert to inches instead of cm
@@ -61,7 +58,6 @@ def getPose(largest_contour):
     rvec, _ = cv2.Rodrigues(rvec)
     return rvec, tvec
 
-
 def drawBox(img, corners, imgpts):
     imgpts = np.int32(imgpts).reshape(-1, 2)
     img = cv2.drawContours(img, [imgpts[:4]], -1, (0, 255, 0), -3)
@@ -69,7 +65,6 @@ def drawBox(img, corners, imgpts):
         img = cv2.line(img, tuple(imgpts[i]), tuple(imgpts[j]), (255), 3)
     img = cv2.drawContours(img, [imgpts[4:]], -1, (0, 0, 255), 3)
     return img
-
 
 def run():
     cap = cv2.VideoCapture(0)
@@ -113,7 +108,6 @@ def run():
     cap.release()
     cv2.destroyAllWindows()
 
-
 # correct for wrong rotation brought on by limitations of perspective n'perspective model (flipped rvec signs)
 
 def correctRotation(measurement, tvec):
@@ -123,12 +117,8 @@ def correctRotation(measurement, tvec):
     if measurement.shape == (3, 3):
 
         measurement, _ = cv2.Rodrigues(measurement)
-
         measurement = measurement.astype(np.float32)
-
-        # measurementMatrix = np.eye(3,9, dtype=np.float32)
         measurementMatrix = np.eye(3,9, dtype=np.float32)
-
         transitionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0, 0, 0],
                                  [0, 1, 0, 1, 0, 0, 0, 0, 0],
                                  [0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -145,7 +135,6 @@ def correctRotation(measurement, tvec):
         statePre = np.zeros((9,1), dtype=np.float32)
         errorCovPost = np.zeros((9, 9), dtype=np.float32)
 
-
         kalman_filter.measurementMatrix = measurementMatrix
         kalman_filter.transitionMatrix = transitionMatrix
         kalman_filter.processNoiseCov = processNoiseCov
@@ -157,10 +146,7 @@ def correctRotation(measurement, tvec):
         kalman_filter.correct(measurement)
         prediction = kalman_filter.predict()
 # in the future use the statepost, and make more accurate matrices
-        # final_estimate = prediction[:9, :1].reshape(3,3)
-
+       
         final_estimate = prediction[:3, :3]
-
         final_estimate = final_estimate.astype(type(tvec[0][0]))
-
         return final_estimate
