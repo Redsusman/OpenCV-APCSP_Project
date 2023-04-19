@@ -7,7 +7,7 @@ import cameraCalibration as calib
 while True:
        if key.is_pressed('u'):
            detectCube.run()
-           breaku
+           break
        elif key.is_pressed('o'):
            detectCone.run()
            break

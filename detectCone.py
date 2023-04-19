@@ -19,7 +19,10 @@ kernelMatrix = np.multiply(1/256, np.array([
     [1, 4, 6, 4, 1]]))
 
 
-dilationKernel = np.ones((5,5), np.uint8)
+dilationKernel = np.ones((5, 5), np.uint8)
+
+conePointsInches = np.array([(0, 0, 0), (4.1875, 0.25, 0),(
+    8.375, 0.25, 0), (4.1875, 12.8125, 0)], dtype=np.float32)
 
 mtx = calib.mtx
 dist = calib.dist
@@ -27,6 +30,7 @@ tvecs = calib.tvecs
 rvecs = calib.rvecs
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
+
 def getCoordinatesInches(contours):
     array = []
     for i in contours:
@@ -39,11 +43,16 @@ def getCoordinatesInches(contours):
             return array
     return array
 
-def distance(objectDimensions, focalLength_mm, objectImageSensor):
-    distanceInches = (objectDimensions * focalLength_mm/objectImageSensor)/25.4
-    cv2.solvePnP()
-    cv2.calibrateCamera()
-    return distanceInches
+
+def getPose(contours):
+    largest_contour = max(contours, key=cv2.contourArea)
+    (x, y, w, h) = cv2.boundingRect(largest_contour)
+    imagePoints = np.array(
+        [(x, y + h), ((x+w)/2, y+h), (x+w, y+h), ((x+w)/2, y)], dtype=np.float32)
+    ret, rvec, tvec = cv2.solvePnP(
+        conePointsInches, imagePoints, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
+    rvec, _ = cv2.Rodrigues(rvec)
+    return rvec, tvec
 
 
 def run():
@@ -71,6 +80,11 @@ def run():
 
         cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 50),
                     cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+        
+
+        if contours or len(contours) > 0:
+            pose = getPose(contours)
+            cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
 
         cv2.imshow("cone video", filter)
         # cv2.imshow("exposure", cv2.convertScaleAbs(filter, dst = 1.5, alpha=1.43))
@@ -81,15 +95,3 @@ def run():
     cap.release()
     cv2.destroyAllWindows()
 
-
-def getPose(image):
-    array = []
-    objectPoints = np.array([getCoordinatesInches()[0], getCoordinatesInches()[1], getCoordinatesInches()[2]])
-    contours, hierarchies = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-
-    for i in contours:
-        (x,y) = cv2.boundingRect(i)
-        array.append((x,y))
-
-    ret, rvec, tvec = cv2.solvePnP(objectPoints, array, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
-    return np.array([rvec, tvec])
