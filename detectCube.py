@@ -95,11 +95,11 @@ def run():
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
             
-            secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0], pose[1]), pose[1], mtx, dist)
+            secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0], pose[1])[0], pose[1], mtx, dist)
             print(type(pose[0]))
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            drawBox(filter, axis, secondImagePoints)
-            print(correctRotation(pose[0], pose[1]))
+            drawBox(filter, axis, imagePoints)
+            print(correctRotation(pose[0], pose[1])[0])
         cv2.imshow("cube video", filter)
 
         if cv2.waitKey(1) == ord('q'):
@@ -134,6 +134,7 @@ def correctRotation(measurement, tvec):
         errorCovPre = np.ones((9,9), dtype=np.float32)
         statePre = np.zeros((9,1), dtype=np.float32)
         errorCovPost = np.zeros((9, 9), dtype=np.float32)
+        statePost = np.zeros((9,1), dtype=np.float32)
 
         kalman_filter.measurementMatrix = measurementMatrix
         kalman_filter.transitionMatrix = transitionMatrix
@@ -142,11 +143,14 @@ def correctRotation(measurement, tvec):
         kalman_filter.errorCovPre = errorCovPre
         kalman_filter.errorCovPost = errorCovPost
         kalman_filter.statePre = statePre
+        kalman_filter.statePost = statePost.flatten()
 
         kalman_filter.correct(measurement)
         prediction = kalman_filter.predict()
-# in the future use the statepost, and make more accurate matrices
-       
         final_estimate = prediction[:3, :3]
         final_estimate = final_estimate.astype(type(tvec[0][0]))
-        return final_estimate
+        second_final_estimate = kalman_filter.statePost.reshape(3,3)
+        second_final_estimate = second_final_estimate.astype(type(tvec[0][0]))
+
+        return final_estimate, second_final_estimate
+       
