@@ -95,11 +95,11 @@ def run():
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
             
-            secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0], pose[1])[0], pose[1], mtx, dist)
-            print(type(pose[0]))
+            secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0], pose[1], cap)[0], pose[1], mtx, dist)
+            # print(type(pose[0]))
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, imagePoints)
-            print(correctRotation(pose[0], pose[1])[0])
+            # print(correctRotation(pose[0], pose[1], cap)[0])
         cv2.imshow("cube video", filter)
 
         if cv2.waitKey(1) == ord('q'):
@@ -110,17 +110,24 @@ def run():
 
 # correct for wrong rotation brought on by limitations of perspective n'perspective model (flipped rvec signs)
 
-def correctRotation(measurement, tvec):
+def correctRotation(measurement, tvec, cap):
 
     kalman_filter = cv2.KalmanFilter(9, 3, 0)
 
+    # timestamp in seconds
+    # dt=0.01
+    if cap.isOpened():
+        dt = cap.get(cv2.CAP_PROP_POS_MSEC)/1000000000
+        print(dt)
+        if not cap.isOpened():
+            dt = 0.01
+        
     if measurement.shape == (3, 3):
-
         measurement, _ = cv2.Rodrigues(measurement)
         measurement = measurement.astype(np.float32)
         measurementMatrix = np.eye(3,9, dtype=np.float32)
-        transitionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0, 0, 0],
-                                 [0, 1, 0, 1, 0, 0, 0, 0, 0],
+        transitionMatrix = np.array([[1, 0, dt, 0, 0, 0, 0, 0, 0],
+                                 [0, 1, 0, dt, 0, 0, 0, 0, 0],
                                  [0, 0, 1, 0, 0, 0, 0, 0, 0],
                                  [0, 0, 0, 1, 0, 0, 0, 0, 0],
                                  [0, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -144,9 +151,11 @@ def correctRotation(measurement, tvec):
         kalman_filter.errorCovPost = errorCovPost
         kalman_filter.statePre = statePre
         kalman_filter.statePost = statePost.flatten()
+        # iterate through predictions for more accurate correction and predictions with more sensor data
+        for i in range(100):
+            kalman_filter.correct(measurement)
+            prediction = kalman_filter.predict()
 
-        kalman_filter.correct(measurement)
-        prediction = kalman_filter.predict()
         final_estimate = prediction[:3, :3]
         final_estimate = final_estimate.astype(type(tvec[0][0]))
         second_final_estimate = kalman_filter.statePost.reshape(3,3)
