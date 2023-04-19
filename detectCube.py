@@ -99,6 +99,9 @@ def run():
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
+            
+            secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0]), pose[1], mtx, dist)
+            print(type(pose[0]))
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, imagePoints)
             print(correctRotation(pose[0]))
@@ -113,45 +116,57 @@ def run():
 
 # correct for wrong rotation brought on by limitations of perspective n'perspective model (flipped rvec signs)
 
-def correctRotation(rvec):
-    rvec = rvec.astype(np.float32)
-    # rvec = rvec.reshape(3, 3)
+def correctRotation(measurement):
+
     kalman_filter = cv2.KalmanFilter(9, 3, 0)
 
-    kalman_filter.measurementMatrix = np.eye(3, dtype=np.float32)
+    if measurement.shape == (3, 3):
 
-    kalman_filter.transitionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0, 0, 0],
-                                               [0, 1, 0, 1, 0, 0, 0, 0, 0],
-                                               [0, 0, 1, 0, 0, 0, 0, 0, 0],
-                                               [0, 0, 0, 1, 0, 0, 0, 0, 0],
-                                               [0, 0, 0, 0, 1, 0, 0, 0, 0],
-                                               [0, 0, 0, 0, 0, 1, 0, 0, 0],
-                                               [0, 0, 0, 0, 0, 0, 1, 0, 0],
-                                               [0, 0, 0, 0, 0, 0, 0, 1, 0],
-                                               [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
-    
-    
+        measurement, _ = cv2.Rodrigues(measurement)
 
-    kalman_filter.processNoiseCov = np.eye(9, dtype=np.float32)
-    kalman_filter.measurementNoiseCov = np.eye(3, dtype=np.float32)
+        measurement = measurement.astype(np.float32)
 
-    cv2.setIdentity(kalman_filter.measurementMatrix)
-    cv2.setIdentity(kalman_filter.processNoiseCov, 1e-5)
-    cv2.setIdentity(kalman_filter.measurementNoiseCov, 1e-1)
-    cv2.setIdentity(kalman_filter.errorCovPost, 1)
+        # measurementMatrix = np.eye(3,9, dtype=np.float32)
+        measurementMatrix = np.eye(3,9, dtype=np.float32)
+
+        transitionMatrix = np.array([[1, 0, 1, 0, 0, 0, 0, 0, 0],
+                                 [0, 1, 0, 1, 0, 0, 0, 0, 0],
+                                 [0, 0, 1, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 1, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 1, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 1, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0, 1, 0],
+                                 [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
+
+        processNoiseCov = np.eye(9, dtype=np.float32) * 1e-5
+        measurementNoiseCov = np.eye(3, dtype=np.float32) * 1e-1
+        errorCovPre = np.ones((9,9), dtype=np.float32)
+        statePre = np.zeros((9,1), dtype=np.float32)
+        errorCovPost = np.zeros((9, 9), dtype=np.float32)
 
 
-    
-    kalman_filter.correct(rvec.flatten())
-    
-    prediction = kalman_filter.predict()
+        kalman_filter.measurementMatrix = measurementMatrix
+        kalman_filter.transitionMatrix = transitionMatrix
+        kalman_filter.processNoiseCov = processNoiseCov
+        kalman_filter.measurementNoiseCov = measurementNoiseCov
+        kalman_filter.errorCovPre = errorCovPre
+        kalman_filter.errorCovPost = errorCovPost
+        kalman_filter.statePre = statePre
 
-    final_estimate = prediction[:3, :3]
+        kalman_filter.correct(measurement)
+        prediction = kalman_filter.predict()
 
-    final_estimate = final_estimate.reshape(3,3)
+        final_estimate = prediction[:3, :3]
 
-    final_estimate = final_estimate.astype(np.float32)
+        final_estimate = final_estimate.astype(np.float32)
 
-    rot_matrix, _ = cv2.Rodrigues(final_estimate)
-    return rot_matrix
+        rot_matrix = cv2.Rodrigues(final_estimate)
+        rot_matrix = np.array(rot_matrix, dtype=np.float32)
 
+        return rot_matrix
+
+
+def listToMat(list):
+    mat = cv2.dnn.blobFromImage(list, scalefactor=1.0, size=list.shape, mean=(0, 0, 0), swapRB=False, crop=False)
+    return mat
