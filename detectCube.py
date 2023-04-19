@@ -100,11 +100,11 @@ def run():
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
             
-            secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0]), pose[1], mtx, dist)
+            secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0], pose[1]), pose[1], mtx, dist)
             print(type(pose[0]))
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, imagePoints)
-            print(correctRotation(pose[0]))
+            print(correctRotation(pose[0], pose[1]))
         cv2.imshow("cube video", filter)
 
         if cv2.waitKey(1) == ord('q'):
@@ -116,7 +116,7 @@ def run():
 
 # correct for wrong rotation brought on by limitations of perspective n'perspective model (flipped rvec signs)
 
-def correctRotation(measurement):
+def correctRotation(measurement, tvec):
 
     kalman_filter = cv2.KalmanFilter(9, 3, 0)
 
@@ -156,17 +156,9 @@ def correctRotation(measurement):
 
         kalman_filter.correct(measurement)
         prediction = kalman_filter.predict()
+# in the future use the statepost, and make more accurate matrices
+        final_estimate = prediction[:9, :1].reshape(3,3)
 
-        final_estimate = prediction[:3, :3]
+        final_estimate = final_estimate.astype(type(tvec[0][0]))
 
-        final_estimate = final_estimate.astype(np.float32)
-
-        rot_matrix = cv2.Rodrigues(final_estimate)
-        rot_matrix = np.array(rot_matrix, dtype=np.float32)
-
-        return rot_matrix
-
-
-def listToMat(list):
-    mat = cv2.dnn.blobFromImage(list, scalefactor=1.0, size=list.shape, mean=(0, 0, 0), swapRB=False, crop=False)
-    return mat
+        return final_estimate
