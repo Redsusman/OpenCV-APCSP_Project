@@ -103,7 +103,7 @@ def run():
             secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0], pose[1]), pose[1], mtx, dist)
             print(type(pose[0]))
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            drawBox(filter, axis, imagePoints)
+            drawBox(filter, axis, secondImagePoints)
             print(correctRotation(pose[0], pose[1]))
         cv2.imshow("cube video", filter)
 
@@ -157,7 +157,9 @@ def correctRotation(measurement, tvec):
         kalman_filter.correct(measurement)
         prediction = kalman_filter.predict()
 # in the future use the statepost, and make more accurate matrices
-        final_estimate = prediction[:9, :1].reshape(3,3)
+        # final_estimate = prediction[:9, :1].reshape(3,3)
+
+        final_estimate = prediction[:3, :3]
 
         final_estimate = final_estimate.astype(type(tvec[0][0]))
 
