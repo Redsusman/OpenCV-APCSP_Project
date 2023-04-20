@@ -93,7 +93,7 @@ def run():
         if contours or len(contours) > 0:
             large_contour = max(contours, key=cv2.contourArea)
             pose = getPose(large_contour)
-            cv2.putText(filter, str(pose[1]/2.54), (50, 100),
+            cv2.putText(filter, str(pose[1]), (50, 100),
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             cv2.putText(filter, str([np.degrees(angle) for angle in pose[0]]), (50, 200),
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
@@ -104,10 +104,10 @@ def run():
                 axis, correctRotation(pose[0], pose[1], cap)[1], pose[1], mtx, dist)
             # print(type(pose[0]))
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            drawBox(filter, axis, secondImagePoints, (0, 0, 255))
+            drawBox(filter, axis, imagePoints, (0, 0, 255))
             # drawBox(filter, axis, imagePoints, (0, 0, 255))
             secondPose = correctRotation(pose[0], pose[1], cap)
-            print(str([np.degrees(angle) for angle in secondPose[1]]))
+            # print(str([np.degrees(angle) for angle in secondPose[1]]))
         cv2.imshow("cube video", filter)
 
         if cv2.waitKey(1) == ord('q'):
