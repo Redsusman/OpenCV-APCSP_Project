@@ -32,6 +32,7 @@ rvecs = calib.rvecs
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
 
+
 def getCoordinatesInches(contours):
     array = []
     for i in contours:
@@ -44,9 +45,11 @@ def getCoordinatesInches(contours):
             return array
     return array
 
+
 def distance(objectDimensions, focalLength_mm, objectImageSensor):
     distanceInches = (objectDimensions * focalLength_mm/objectImageSensor)/25.4
     return distanceInches
+
 
 def getPose(largest_contour):
     # convert to inches instead of cm
@@ -58,13 +61,15 @@ def getPose(largest_contour):
     rvec, _ = cv2.Rodrigues(rvec)
     return rvec, tvec
 
-def drawBox(img, corners, imgpts):
+
+def drawBox(img, corners, imgpts, color):
     imgpts = np.int32(imgpts).reshape(-1, 2)
-    img = cv2.drawContours(img, [imgpts[:4]], -1, (0, 255, 0), -3)
+    img = cv2.drawContours(img, [imgpts[:4]], -1, color, -3)
     for i, j in zip(range(4), range(4, 8)):
-        img = cv2.line(img, tuple(imgpts[i]), tuple(imgpts[j]), (255), 3)
-    img = cv2.drawContours(img, [imgpts[4:]], -1, (0, 0, 255), 3)
+        img = cv2.line(img, tuple(imgpts[i]), tuple(imgpts[j]), color, 3)
+    img = cv2.drawContours(img, [imgpts[4:]], -1, color, 3)
     return img
+
 
 def run():
     cap = cv2.VideoCapture(0)
@@ -94,12 +99,15 @@ def run():
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
-            
-            secondImagePoints, jacobian = cv2.projectPoints(axis, correctRotation(pose[0], pose[1], cap)[0], pose[1], mtx, dist)
+
+            secondImagePoints, jacobian = cv2.projectPoints(
+                axis, correctRotation(pose[0], pose[1], cap)[1], pose[1], mtx, dist)
             # print(type(pose[0]))
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            drawBox(filter, axis, imagePoints)
-            # print(correctRotation(pose[0], pose[1], cap)[0])
+            drawBox(filter, axis, secondImagePoints, (0, 0, 255))
+            # drawBox(filter, axis, imagePoints, (0, 0, 255))
+            secondPose = correctRotation(pose[0], pose[1], cap)
+            print(str([np.degrees(angle) for angle in secondPose[1]]))
         cv2.imshow("cube video", filter)
 
         if cv2.waitKey(1) == ord('q'):
@@ -110,6 +118,7 @@ def run():
 
 # correct for wrong rotation brought on by limitations of perspective n'perspective model (flipped rvec signs)
 
+
 def correctRotation(measurement, tvec, cap):
 
     kalman_filter = cv2.KalmanFilter(9, 3, 0)
@@ -117,41 +126,30 @@ def correctRotation(measurement, tvec, cap):
     # timestamp in seconds
     # dt=0.01
     if cap.isOpened():
-        dt = cap.get(cv2.CAP_PROP_POS_MSEC)/1000000000
-        print(dt)
+        dt = cap.get(cv2.CAP_PROP_POS_MSEC)/1000
         if not cap.isOpened():
             dt = 0.01
-        
+
     if measurement.shape == (3, 3):
         measurement, _ = cv2.Rodrigues(measurement)
         measurement = measurement.astype(np.float32)
-        measurementMatrix = np.eye(3,9, dtype=np.float32)
-        transitionMatrix = np.array([[1, 0, dt, 0, 0, 0, 0, 0, 0],
-                             [0, 1, 0, dt, 0, 0, 0, 0, 0],
-                             [0, 0, 1, 0, 0, 0, 0, 0, 0],
-                             [0, 0, 0, 1, 0, 0, 0, 0, 0],
-                             [0, 0, 0, 0, 1, 0, 0, 0, 0],
-                             [0, 0, 0, 0, 0, 1, 0, 0, 0],
-                             [0, 0, 0, 0, 0, 0, np.cos(dt), -np.sin(dt), 0],
-                             [0, 0, 0, 0, 0, 0, np.sin(dt), np.cos(dt), 0],
-                             [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
-        
-        # transitionMatrix = np.array([[1, 0, dt, 0, 0, 0, 0, 0, 0],
-        #                          [0, 1, 0, dt, 0, 0, 0, 0, 0],
-        #                          [0, 0, 1, 0, 0, 0, 0, 0, 0],
-        #                          [0, 0, 0, 1, 0, 0, 0, 0, 0],
-        #                          [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        #                          [0, 0, 0, 0, 0, 1, 0, 0, 0],
-        #                          [0, 0, 0, 0, 0, 0, 1, 0, 0],
-        #                          [0, 0, 0, 0, 0, 0, 0, 1, 0],
-        #                          [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
+        measurementMatrix = np.eye(3, 9, dtype=np.float32)
+        transitionMatrix = np.array([[1, 0, 0, dt, 0, 0, 0, 0, 0],
+                                     [0, 1, 0, 0, dt, 0, 0, 0, 0],
+                                     [0, 0, 1, 0, 0, dt, 0, 0, 0],
+                                     [0, 0, 0, 1, 0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0, 1, 0, 0, 0],
+                                     [0, 0, 0, 0, 0, 0, 1, dt, 0],
+                                     [0, 0, 0, 0, 0, 0, 0, 1, dt],
+                                     [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
 
-        processNoiseCov = np.eye(9, dtype=np.float32) * 1e-5
-        measurementNoiseCov = np.eye(3, dtype=np.float32) * 1e-1
-        errorCovPre = np.ones((9,9), dtype=np.float32)
-        statePre = np.zeros((9,1), dtype=np.float32)
+        processNoiseCov = np.eye(9, dtype=np.float32) * 1e-6
+        measurementNoiseCov = np.eye(3, dtype=np.float32) * 1e-3
+        errorCovPre = np.ones((9, 9), dtype=np.float32)
+        statePre = np.zeros((9, 1), dtype=np.float32)
         errorCovPost = np.zeros((9, 9), dtype=np.float32)
-        statePost = np.zeros((9,1), dtype=np.float32)
+        statePost = np.zeros((9, 1), dtype=np.float32)
 
         kalman_filter.measurementMatrix = measurementMatrix
         kalman_filter.transitionMatrix = transitionMatrix
@@ -160,16 +158,19 @@ def correctRotation(measurement, tvec, cap):
         kalman_filter.errorCovPre = errorCovPre
         kalman_filter.errorCovPost = errorCovPost
         kalman_filter.statePre = statePre
-        kalman_filter.statePost = statePost.flatten()
+        kalman_filter.statePost = statePost
         # iterate through predictions for more accurate correction and predictions with more sensor data
-        for i in range(100):
+        for i in range(1000):
             kalman_filter.correct(measurement)
             prediction = kalman_filter.predict()
 
         final_estimate = prediction[:3, :3]
         final_estimate = final_estimate.astype(type(tvec[0][0]))
-        second_final_estimate = kalman_filter.statePost.reshape(3,3)
+
+        kalman_filter.correct(measurement)
+        prediction = kalman_filter.predict()
+
+        second_final_estimate = kalman_filter.statePost[:3, :3]
         second_final_estimate = second_final_estimate.astype(type(tvec[0][0]))
 
         return final_estimate, second_final_estimate
-       

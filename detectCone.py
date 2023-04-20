@@ -55,10 +55,13 @@ def getPose(contours):
     return rvec, tvec
 
 def getContourCorners(contours):
-    imagePoints = np.array([], dtype=np.float32)
-    for i, j in zip(range(0, len(contours)), range(1, len(contours))):
-       imagePoints = np.append(imagePoints, cv2.intersectConvexConvex(contours[i], contours[j]))
-    return imagePoints
+    intersections = []
+    if len(contours) > 1:
+        for i in range(0, len(contours) - 1):
+             corners = cv2.intersectConvexConvex(contours[i], contours[i+1])
+             intersections.append(corners)
+    
+    return intersections
            
        
 
@@ -93,6 +96,7 @@ def run():
         if contours or len(contours) > 0:
             pose = getPose(contours)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
+            print(getContourCorners(contours))
 
         cv2.imshow("cone video", filter)
         # cv2.imshow("exposure", cv2.convertScaleAbs(filter, dst = 1.5, alpha=1.43))
