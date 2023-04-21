@@ -93,6 +93,10 @@ def run():
         if contours or len(contours) > 0:
             large_contour = max(contours, key=cv2.contourArea)
             pose = getPose(large_contour)
+
+            if pose[0].all() < 0:
+                pose[0] = -pose[0]
+
             cv2.putText(filter, str(pose[1]), (50, 100),
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             cv2.putText(filter, str([np.degrees(angle) for angle in pose[0]]), (50, 200),
@@ -104,7 +108,7 @@ def run():
                 axis, correctRotation(pose[0], pose[1], cap)[1], pose[1], mtx, dist)
             # print(type(pose[0]))
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            drawBox(filter, axis, imagePoints, (0, 0, 255))
+            drawBox(filter, axis, secondImagePoints, (0, 0, 255))
             # drawBox(filter, axis, imagePoints, (0, 0, 255))
             secondPose = correctRotation(pose[0], pose[1], cap)
             # print(str([np.degrees(angle) for angle in secondPose[1]]))
@@ -160,7 +164,7 @@ def correctRotation(measurement, tvec, cap):
         kalman_filter.statePre = statePre
         kalman_filter.statePost = statePost
         # iterate through predictions for more accurate correction and predictions with more sensor data
-        for i in range(1000):
+        for i in range(2000):
             kalman_filter.correct(measurement)
             prediction = kalman_filter.predict()
 
