@@ -51,16 +51,15 @@ def distance(objectDimensions, focalLength_mm, objectImageSensor):
     return distanceInches
 
 
-def getPose(largest_contour):
-    # convert to inches instead of cm
+def getPose(contours):
+    largest_contour = max(contours, key=cv2.contourArea)
     (x, y, w, h) = cv2.boundingRect(largest_contour)
     imagePoints = np.array(
         [(x, y), (x, y+h), (x+w, y+h), (x+w, y)], dtype=np.float32)
-    # ret, rvec, tvec = cv2.solvePnP(
-    #     cubePointsInches, imagePoints, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
-    ret, rvec, tvec, inliers = cv2.solvePnPRansac(cubePointsInches, imagePoints, mtx, dist)
-    # correct for faulty rotation
-    rvec2, tvec2 = cv2.solvePnPRefineLM(cubePointsInches, imagePoints, mtx, dist, rvec, tvec)
+    ret, rvec, tvec, inliers = cv2.solvePnPRansac(
+        cubePointsInches, imagePoints, mtx, dist)
+    rvec2, tvec2 = cv2.solvePnPRefineLM(
+        cubePointsInches, imagePoints, mtx, dist, rvec, tvec)
     rvec2, _ = cv2.Rodrigues(rvec2)
 
     return rvec2, tvec2
@@ -95,12 +94,7 @@ def run():
                 cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
         if contours or len(contours) > 0:
-            large_contour = max(contours, key=cv2.contourArea)
-            pose = getPose(large_contour)
-
-            if pose[0].all() < 0:
-                pose[0] = -pose[0]
-
+            pose = getPose(contours)
             cv2.putText(filter, str(pose[1]), (50, 100),
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             cv2.putText(filter, str([np.degrees(angle) for angle in pose[0]]), (50, 200),
@@ -109,7 +103,7 @@ def run():
                 axis, pose[0], pose[1], mtx, dist)
 
             secondImagePoints, jacobian = cv2.projectPoints(
-                 axis, correctRotation(pose[0], pose[1], cap)[0], pose[1], mtx, dist)
+                axis, correctRotation(pose[0], pose[1], cap)[0], pose[1], mtx, dist)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, secondImagePoints, (0, 0, 255))
             # drawBox(filter, axis, imagePoints, (0, 0, 255))
@@ -129,14 +123,10 @@ def run():
 def correctRotation(measurement, tvec, cap):
 
     kalman_filter = cv2.KalmanFilter(9, 3, 0)
-
-    # timestamp in seconds
-    # dt=0.01
     if cap.isOpened():
         dt = cap.get(cv2.CAP_PROP_POS_MSEC)/1000
         if not cap.isOpened():
             dt = 0.01
-
     if measurement.shape == (3, 3):
         measurement, _ = cv2.Rodrigues(measurement)
         measurement = measurement.astype(np.float32)
@@ -191,7 +181,6 @@ def correctRotation(measurement, tvec, cap):
         prediction = kalman_filter.predict()
         kalman_filter.correct(measurement)
         # prediction = kalman_filter.predict()
-
         second_final_estimate = kalman_filter.statePost[:3, :3]
         second_final_estimate = second_final_estimate.astype(type(tvec[0][0]))
 
