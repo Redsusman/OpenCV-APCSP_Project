@@ -58,9 +58,7 @@ def getPose(largest_contour):
         [(x, y), (x, y+h), (x+w, y+h), (x+w, y)], dtype=np.float32)
     # ret, rvec, tvec = cv2.solvePnP(
     #     cubePointsInches, imagePoints, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
-    
     ret, rvec, tvec, inliers = cv2.solvePnPRansac(cubePointsInches, imagePoints, mtx, dist)
-  
     # correct for faulty rotation
     rvec2, tvec2 = cv2.solvePnPRefineLM(cubePointsInches, imagePoints, mtx, dist, rvec, tvec)
     rvec2, _ = cv2.Rodrigues(rvec2)
@@ -111,7 +109,7 @@ def run():
                 axis, pose[0], pose[1], mtx, dist)
 
             secondImagePoints, jacobian = cv2.projectPoints(
-                 axis, correctRotation(pose[0], pose[1], cap)[1], pose[1], mtx, dist)
+                 axis, correctRotation(pose[0], pose[1], cap)[0], pose[1], mtx, dist)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, secondImagePoints, (0, 0, 255))
             # drawBox(filter, axis, imagePoints, (0, 0, 255))
@@ -179,15 +177,20 @@ def correctRotation(measurement, tvec, cap):
         kalman_filter.statePre = statePre
         kalman_filter.statePost = statePost
         # iterate through predictions for more accurate correction and predictions with more sensor data
+        if measurement[2].any() < 0:
+            measurement = -measurement
+
         for i in range(2000):
-            kalman_filter.correct(measurement)
             prediction = kalman_filter.predict()
+            kalman_filter.correct(measurement)
+            # prediction = kalman_filter.predict()
 
         final_estimate = prediction[:3, :3]
         final_estimate = final_estimate.astype(type(tvec[0][0]))
 
-        kalman_filter.correct(measurement)
         prediction = kalman_filter.predict()
+        kalman_filter.correct(measurement)
+        # prediction = kalman_filter.predict()
 
         second_final_estimate = kalman_filter.statePost[:3, :3]
         second_final_estimate = second_final_estimate.astype(type(tvec[0][0]))
