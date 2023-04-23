@@ -9,14 +9,14 @@ import numpy as np
 #     corners = [(int(corner[0]), int(corner[1])) for corner in corners]
 #     return corners
 
-img = cv2.imread("OpenCV-APCSP_Project/assets/chess.png")
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-# low = np.array([128, 50, 128])
-# high = np.array([255, 255, 255])
+img = cv2.imread("OpenCV-APCSP_Project/assets/cube.jpeg")
+# gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+low = np.array([128, 50, 128])
+high = np.array([255, 255, 255])
 
-# convert = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-# constraint = cv2.inRange(convert, low, high)
-blur = cv2.GaussianBlur(gray, (5,5), 0)
+convert = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+constraint = cv2.inRange(convert, low, high)
+blur = cv2.GaussianBlur(constraint, (5,5), 0)
 blur = np.float32(blur)
 
 
