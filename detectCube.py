@@ -51,18 +51,18 @@ def distance(objectDimensions, focalLength_mm, objectImageSensor):
     return distanceInches
 
 
-def getPose(contours):
+def getPose(contours, cap):
     largest_contour = max(contours, key=cv2.contourArea)
     (x, y, w, h) = cv2.boundingRect(largest_contour)
     imagePoints = np.array(
         [(x, y), (x, y+h), (x+w, y+h), (x+w, y)], dtype=np.float32)
     ret, rvec, tvec, inliers = cv2.solvePnPRansac(
-        cubePointsInches, imagePoints, mtx, dist)
+        cubePointsInches, imagePoints, mtx, dist, iterationsCount=1000, reprojectionError=2.00, confidence=0.9)
     rvec2, tvec2 = cv2.solvePnPRefineLM(
         cubePointsInches, imagePoints, mtx, dist, rvec, tvec)
     rvec2, _ = cv2.Rodrigues(rvec2)
-
-    return rvec2, tvec2
+    rvec3 = correctRotation(rvec2, tvec2, cap, inliers, 0)
+    return rvec3, tvec2, inliers
 
 
 def drawBox(img, corners, imgpts, color):
@@ -94,7 +94,7 @@ def run():
                 cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
         if contours or len(contours) > 0:
-            pose = getPose(contours)
+            pose = getPose(contours, cap)
             cv2.putText(filter, str(pose[1]), (50, 100),
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             cv2.putText(filter, str([np.degrees(angle) for angle in pose[0]]), (50, 200),
@@ -103,11 +103,10 @@ def run():
                 axis, pose[0], pose[1], mtx, dist)
 
             secondImagePoints, jacobian = cv2.projectPoints(
-                axis, correctRotation(pose[0], pose[1], cap)[0], pose[1], mtx, dist)
+                axis, pose[0], pose[1], mtx, dist)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, secondImagePoints, (0, 0, 255))
             # drawBox(filter, axis, imagePoints, (0, 0, 255))
-            secondPose = correctRotation(pose[0], pose[1], cap)
             # print(str([np.degrees(angle) for angle in secondPose[1]]))
         cv2.imshow("cube video", filter)
 
@@ -120,36 +119,26 @@ def run():
 # correct for wrong rotation brought on by limitations of perspective n'perspective model (flipped rvec signs)
 
 
-def correctRotation(measurement, tvec, cap):
+def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers):
 
     kalman_filter = cv2.KalmanFilter(9, 3, 0)
     if cap.isOpened():
         dt = cap.get(cv2.CAP_PROP_POS_MSEC)/1000
         if not cap.isOpened():
             dt = 0.01
-    if measurement.shape == (3, 3):
+    if (measurement.shape == (3, 3)) and (poseInliers.shape[0] >= minKalmanInliers):
         measurement, _ = cv2.Rodrigues(measurement)
         measurement = measurement.astype(np.float32)
-        measurementMatrix = np.eye(3, 9, dtype=np.float32)
+        measurementMatrix = np.eye(3, 9, dtype=np.float32)      
         transitionMatrix = np.array([[1, 0, 0, dt, 0, 0, 0, 0, 0],
                                      [0, 1, 0, 0, dt, 0, 0, 0, 0],
-                                     [0, 0, 1, 0, 0, dt, 0, 0, 0],
-                                     [0, 0, 0, 1, 0, 0, -1, 0, 0],
-                                     [0, 0, 0, 0, 1, 0, 0, -1, 0],
-                                     [0, 0, 0, 0, 0, 1, 0, 0, -1],
-                                     [0, 0, 0, 0, 0, 0, 1, 0, 0],
-                                     [0, 0, 0, 0, 0, 0, 0, 1, 0],
-                                     [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
-        # original matrix
-        # transitionMatrix = np.array([[1, 0, 0, dt, 0, 0, 0, 0, 0],
-        #                              [0, 1, 0, 0, dt, 0, 0, 0, 0],
-        #                              [0, 0, 1, 0, 0, dt, 0, 0, 0],
-        #                              [0, 0, 0, 1, 0, 0, 0, 0, 0],
-        #                              [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        #                              [0, 0, 0, 0, 0, 1, 0, 0, 0],
-        #                              [0, 0, 0, 0, 0, 0, 1, dt, 0],
-        #                              [0, 0, 0, 0, 0, 0, 0, 1, dt],
-        #                              [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
+                                      [0, 0, 1, 0, 0, dt, 0, 0, 0],
+                                      [0, 0, 0, 1, 0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0, 1, 0, 0, 0],
+                                      [0, 0, 0, 0, 0, 0, 1, dt, 0],
+                                      [0, 0, 0, 0, 0, 0, 0, 1, dt],
+                                      [0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float32)
 
         processNoiseCov = np.eye(9, dtype=np.float32) * 1e-6
         measurementNoiseCov = np.eye(3, dtype=np.float32) * 1e-3
@@ -166,22 +155,28 @@ def correctRotation(measurement, tvec, cap):
         kalman_filter.errorCovPost = errorCovPost
         kalman_filter.statePre = statePre
         kalman_filter.statePost = statePost
-        # iterate through predictions for more accurate correction and predictions with more sensor data
-        if measurement[2].any() < 0:
-            measurement = -measurement
 
-        for i in range(2000):
+        dot_product = np.dot(kalman_filter.statePre[:3].T, measurement)
+    
+        if dot_product < 0:
+            measurement *= -1
+
+        for _ in range(1000):
             prediction = kalman_filter.predict()
             kalman_filter.correct(measurement)
-            # prediction = kalman_filter.predict()
-
+            estimate = kalman_filter.correct(measurement)
+      
         final_estimate = prediction[:3, :3]
         final_estimate = final_estimate.astype(type(tvec[0][0]))
 
-        prediction = kalman_filter.predict()
-        kalman_filter.correct(measurement)
+        # prediction = kalman_filter.predict()
+        # kalman_filter.correct(measurement)
         # prediction = kalman_filter.predict()
         second_final_estimate = kalman_filter.statePost[:3, :3]
         second_final_estimate = second_final_estimate.astype(type(tvec[0][0]))
 
-        return final_estimate, second_final_estimate
+        third_final_estimate = estimate[:3, :3]
+        # third_final_estimate = cv2.Rodrigues(third_final_estimate)
+        
+        # third_final_estimate = estimate.astype(type(tvec[0][0]))
+        return final_estimate, second_final_estimate, third_final_estimate
