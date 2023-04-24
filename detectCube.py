@@ -31,9 +31,6 @@ dist = calib.dist
 tvecs = calib.tvecs
 rvecs = calib.rvecs
 
-# find the xy(later z) coordinates of an tracked object relative to the camera.
-
-
 def getCoordinatesInches(contours):
     array = []
     for i in contours:
@@ -100,24 +97,18 @@ def run():
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             cv2.putText(filter, str([np.degrees(angle) for angle in pose[0]]), (50, 200),
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
-
-            secondImagePoints, jacobian = cv2.projectPoints(
-                axis, correctRotation(pose[0], pose[1], cap, pose[2], 2)[2], pose[1], mtx, dist)
-            covariance = np.eye(3, dtype=np.float32) * 1e-3
-
-            # multiple = np.dot(jacobian, sht)
-            # P = np.dot(multiple, jacobian.T)
-
-            jacobianRot = jacobian[:9, :3]
-            multiple = np.dot(jacobianRot, covariance)
-            X = np.dot(multiple, jacobianRot.T)
-            print(X.shape)
+            
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
             
+            correctRvec = correctRotation(pose[0], pose[1], cap, pose[2], 2, jacobian)[3]
+
+            secondImagePoints, jacobian = cv2.projectPoints(
+                axis, correctRvec, pose[1], mtx, dist)
+            
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            drawBox(filter, axis, secondImagePoints, (0, 0, 255))
-            # print(str([np.degrees(angle) for angle in secondPose[1]]))
+            drawBox(filter, axis, secondImagePoints, (255, 0, 0))
+        
         cv2.imshow("cube video", filter)
 
         if cv2.waitKey(1) == ord('q'):
@@ -129,7 +120,7 @@ def run():
 # correct for wrong rotation brought on by limitations of perspective n'perspective model (flipped rvec signs)
 
 
-def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers):
+def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers, jacobian):
 
     kalman_filter = cv2.KalmanFilter(9, 3, 0)
     if cap.isOpened():
@@ -160,7 +151,13 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers):
         measurementNoiseCov = np.eye(3, dtype=np.float32) * 1e-3
         errorCovPre = np.ones((9, 9), dtype=np.float32)
         statePre = np.zeros((9, 1), dtype=np.float32)
-        errorCovPost = np.zeros((9, 9), dtype=np.float32)
+        jacobianRot = jacobian[:9, :3]
+        multiple = np.dot(jacobianRot, measurementNoiseCov)
+
+        X = np.dot(multiple, jacobianRot.T)
+        X=X.astype(np.float32)
+        errorCovPost = X
+        
         statePost = np.zeros((9, 1), dtype=np.float32)
 
         kalman_filter.measurementMatrix = measurementMatrix
@@ -180,14 +177,10 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers):
         final_estimate = prediction[:3, :3]
         final_estimate = final_estimate.astype(type(tvec[0][0]))
 
-        # prediction = kalman_filter.predict()
-        # kalman_filter.correct(measurement)
-        # prediction = kalman_filter.predict()
         second_final_estimate = kalman_filter.statePost[:3, :3]
         second_final_estimate = second_final_estimate.astype(type(tvec[0][0]))
 
         third_final_estimate = estimate[:3, :3]
-        # third_final_estimate = cv2.Rodrigues(third_final_estimate)
+        four = kalman_filter.statePre[:3, :3]
 
-        # third_final_estimate = estimate.astype(type(tvec[0][0]))
-        return final_estimate, second_final_estimate, third_final_estimate
+        return final_estimate, second_final_estimate, third_final_estimate, four

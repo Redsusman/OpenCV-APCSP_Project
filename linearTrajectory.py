@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plot
 import numpy as np
 import math
+from matplotlib.animation import FuncAnimation
+import numpy.linalg as lin
 
 # generate a linear trajectory from a set of points using polynomial regression
 # specify the speed to drive along the trajectory
@@ -16,9 +18,17 @@ def generateLinearTrajectory(points):
     return a,b,theta,secondTheta
 
 
+def draw(coefficents):
+    xList = []
+    yList = []
 
-#generate parabolic trajectories from an acceleration value, speeds are automatically calculated
-def generateSplineTrajectory(points, speed):
-    return
+    listerr = np.linspace()
+    for x, y in enumerate(coefficents):
+        xList.append()
+    fig, ax = plot.subplot()
+    animation = FuncAnimation(fig, )
+
+
+
 
 
