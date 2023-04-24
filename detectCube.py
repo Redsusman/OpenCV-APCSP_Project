@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import numpy.linalg as lin
 import cameraCalibration as calib
 
 
@@ -57,7 +58,7 @@ def getPose(contours):
     imagePoints = np.array(
         [(x, y), (x, y+h), (x+w, y+h), (x+w, y)], dtype=np.float32)
     ret, rvec, tvec, inliers = cv2.solvePnPRansac(
-        cubePointsInches, imagePoints, mtx, dist, iterationsCount=1000, reprojectionError=2.00, confidence=0.9)
+        cubePointsInches, imagePoints, mtx, dist, iterationsCount=100, reprojectionError=2.00, confidence=0.9, flags=cv2.SOLVEPNP_ITERATIVE)
     rvec2, tvec2 = cv2.solvePnPRefineLM(
         cubePointsInches, imagePoints, mtx, dist, rvec, tvec)
     rvec2, _ = cv2.Rodrigues(rvec2)
@@ -102,7 +103,18 @@ def run():
 
             secondImagePoints, jacobian = cv2.projectPoints(
                 axis, correctRotation(pose[0], pose[1], cap, pose[2], 2)[2], pose[1], mtx, dist)
+            covariance = np.eye(3, dtype=np.float32) * 1e-3
 
+            # multiple = np.dot(jacobian, sht)
+            # P = np.dot(multiple, jacobian.T)
+
+            jacobianRot = jacobian[:9, :3]
+            multiple = np.dot(jacobianRot, covariance)
+            X = np.dot(multiple, jacobianRot.T)
+            print(X.shape)
+            imagePoints, jacobian = cv2.projectPoints(
+                axis, pose[0], pose[1], mtx, dist)
+            
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, secondImagePoints, (0, 0, 255))
             # print(str([np.degrees(angle) for angle in secondPose[1]]))
@@ -125,6 +137,12 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers):
         if not cap.isOpened():
             dt = 0.01
     if (measurement.shape == (3, 3)) or (poseInliers.shape[0] >= minKalmanInliers):
+        # det = lin.det(measurement)
+        # if (det < 0) or (measurement[0][2] < 0):
+        #     flip_matrix = np.identity(3)
+        #     flip_matrix[2, 2] = -1
+        #     measurement = np.dot(measurement, flip_matrix)
+
         measurement, _ = cv2.Rodrigues(measurement)
         measurement = measurement.astype(np.float32)
         measurementMatrix = np.eye(3, 9, dtype=np.float32)
@@ -153,11 +171,6 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers):
         kalman_filter.errorCovPost = errorCovPost
         kalman_filter.statePre = statePre
         kalman_filter.statePost = statePost
-
-        dot_product = np.dot(kalman_filter.statePre[:3].T, measurement)
-
-        if dot_product < 0:
-            measurement *= -1
 
         for _ in range(1000):
             prediction = kalman_filter.predict()

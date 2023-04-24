@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+import numpy.linalg as lin
 # def getContourCorners(contours): 
 #     for i in range(0, len(contours)-1):
 #         corners = cv2.intersectConvexConvex(contours[i], contours[i+1])
@@ -37,3 +37,5 @@ cv2.imshow("img", img)
 
 cv2.waitKey(10000)
 cv2.destroyAllWindows()
+
+lin.det()

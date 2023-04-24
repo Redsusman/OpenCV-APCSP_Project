@@ -51,7 +51,6 @@ def getPose(contours):
         [(x, y + h), ((x+w)/2, y+h), (x+w, y+h), ((x+w)/2, y)], dtype=np.float32)
     ret, rvec, tvec = cv2.solvePnP(
         conePointsInches, imagePoints, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
-    rvec, _ = cv2.Rodrigues(rvec)
     return rvec, tvec
 
 def getContourCorners(contours):
@@ -89,17 +88,18 @@ def run():
             if cv2.contourArea(i) > 175:
                 cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        cv2.putText(filter, str(getCoordinatesInches(contours)), (0, 50),
-                    cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
         
 
         if contours or len(contours) > 0:
             pose = getPose(contours)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            print(getContourCorners(contours))
+            cv2.putText(filter, str(pose[0]), (0, 50),
+                    cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+            print(pose[0])
 
         cv2.imshow("cone video", filter)
         # cv2.imshow("exposure", cv2.convertScaleAbs(filter, dst = 1.5, alpha=1.43))
+
 
         if cv2.waitKey(1) == ord('q'):
             break
