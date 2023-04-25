@@ -18,17 +18,30 @@ def generateLinearTrajectory(points):
     return a,b,theta,secondTheta
 
 
-def draw(coefficents):
+def draw(coefficents, points):
     xList = []
     yList = []
 
-    listerr = np.linspace()
-    for x, y in enumerate(coefficents):
-        xList.append()
+    for x in range(round(points[1][0])):
+         elementsY = coefficents[0] * x + coefficents[1]
+         yList.append(elementsY)
+         xList.append(x)
+
     fig, ax = plot.subplot()
     animation = FuncAnimation(fig, )
 
 
+def drawTwo(points):
+    xList = np.linspace(0, points[1][0], 50)
+    yList = np.linspace(0, points[1][1], 50)
+    animation = plot.plot(xList,yList)
+    fig, ax = plot.subplot()
+    anim = FuncAnimation(fig, animation, interval=700)
+    plot.show()
+    
 
+
+points = np.array([(0,0), (13, 17)], dtype=np.float32)
+drawTwo(points)
 
 

@@ -101,13 +101,13 @@ def run():
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
             
-            correctRvec = correctRotation(pose[0], pose[1], cap, pose[2], 2, jacobian)[3]
+            correctRvec = correctRotation(pose[0], pose[1], cap, pose[2], 2, jacobian)[2]
 
             secondImagePoints, jacobian = cv2.projectPoints(
                 axis, correctRvec, pose[1], mtx, dist)
             
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            drawBox(filter, axis, secondImagePoints, (255, 0, 0))
+            drawBox(filter, axis, imagePoints, (255, 0, 0))
         
         cv2.imshow("cube video", filter)
 
