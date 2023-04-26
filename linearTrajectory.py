@@ -5,7 +5,9 @@ from matplotlib.animation import FuncAnimation
 import numpy.linalg as lin
 
 # generate a linear trajectory from a set of points using polynomial regression
-# specify the speed to drive along the trajectory
+# returns coefficents of the function of points, and the angle of the line relative to the postive
+# x, and positive y axes. All these form a 1d tuple of (coefficent1, coefficent 2, theta1, theta).
+# where coefficents1 and 2 represents the equation y=mx+b, m is coefficent1, b is coefficent2.
 
 def generateLinearTrajectory(points):
     secondList = points
@@ -18,35 +20,26 @@ def generateLinearTrajectory(points):
 
 
 def draw(coefficents, points):
-    xList = []
-    xListTwo = []
     yList = []
     x_points = np.linspace(points[0][0], points[1][0], 10)
 
-    for x in range(round(points[1][0])):
-         elementsY = coefficents[0] * x + coefficents[1]
-         yList.append(elementsY)
-         xList.append(x)
+    for x in x_points:
+        elementsY = (coefficents[0] * x) + coefficents[1]
+        yList.append(elementsY)
+
+    fig, ax = plot.subplots()
+
+    ax.set_xlim(0, 250)
+    ax.set_ylim(0, 100)
+
+    line = ax.plot(points[0][0], points[0][1])
+
+    line.set_xdata(x_points)
+    line.set_ydata(yList)
     
-    for x_ in x_points:
-        elementsYr = (coefficents[0] * x_) + coefficents[1]
-        xListTwo.append(elementsYr)
-
-    fig, ax = plot.subplot()
-    animation = plot.plot(xList, yList)
-    anim = FuncAnimation(fig, animation, interval=700)
+    animation = plot.plot(x_points, yList)
+    anim = FuncAnimation(fig, func=line, frames=np.arange(0, 10, 0.01),  interval=10)
     plot.show()
-
-
-def drawTwo(points):
-    xList = np.linspace(0, points[1][0], 50)
-    yList = np.linspace(0, points[1][1], 50)
-    animation = plot.plot(xList,yList)
-    fig, ax = plot.subplot()
-    anim = FuncAnimation(fig, animation, interval=700)
-    plot.show()
-    
-
 
 points = np.array([(0,0), (13, 17)], dtype=np.float32)
 
