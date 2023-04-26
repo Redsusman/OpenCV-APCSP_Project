@@ -14,21 +14,28 @@ def generateLinearTrajectory(points):
     a, b = np.polyfit(x, y, 1)
     theta = np.degrees(np.arctan(a))
     secondTheta = 90 - theta
-    print(a,"x+", b)
     return a,b,theta,secondTheta
 
 
 def draw(coefficents, points):
     xList = []
+    xListTwo = []
     yList = []
+    x_points = np.linspace(points[0][0], points[1][0], 10)
 
     for x in range(round(points[1][0])):
          elementsY = coefficents[0] * x + coefficents[1]
          yList.append(elementsY)
          xList.append(x)
+    
+    for x_ in x_points:
+        elementsYr = (coefficents[0] * x_) + coefficents[1]
+        xListTwo.append(elementsYr)
 
     fig, ax = plot.subplot()
-    animation = FuncAnimation(fig, )
+    animation = plot.plot(xList, yList)
+    anim = FuncAnimation(fig, animation, interval=700)
+    plot.show()
 
 
 def drawTwo(points):
@@ -42,6 +49,9 @@ def drawTwo(points):
 
 
 points = np.array([(0,0), (13, 17)], dtype=np.float32)
-drawTwo(points)
+
+coefficents = generateLinearTrajectory(points)
+
+draw(coefficents, points)
 
 

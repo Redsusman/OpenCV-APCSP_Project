@@ -1,7 +1,5 @@
 import numpy as np
 import numpy.linalg as lin
+import cv2
 
-array = np.zeros((9,3), dtype=np.float32)
-arrayTwo = np.eye(3, dtype=np.float32)
-
-print(np.dot(array, arrayTwo))
+cv2.normalize()
