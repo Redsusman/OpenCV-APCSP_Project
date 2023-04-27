@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import numpy.linalg as lin
 import cameraCalibration as calib
+import keyboard as key
+import linearTrajectory as traj
 
 
 # used to control what color the camera should be looking, this interval can detect, say a purple cube.
@@ -108,6 +110,12 @@ def run():
             
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, imagePoints, (255, 0, 0))
+
+            points = np.array([(0,0), (pose[1][0], pose[1][2])], dtype=np.float32)
+
+            if key.is_pressed('t'):
+                coefficents = traj.generateLinearTrajectory(points)
+                traj.draw(coefficents, points)
         
         cv2.imshow("cube video", filter)
 
@@ -128,11 +136,6 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers, jacob
         if not cap.isOpened():
             dt = 0.01
     if (measurement.shape == (3, 3)) or (poseInliers.shape[0] >= minKalmanInliers):
-        # det = lin.det(measurement)
-        # if (det < 0) or (measurement[0][2] < 0):
-        #     flip_matrix = np.identity(3)
-        #     flip_matrix[2, 2] = -1
-        #     measurement = np.dot(measurement, flip_matrix)
 
         measurement, _ = cv2.Rodrigues(measurement)
         measurement = measurement.astype(np.float32)
