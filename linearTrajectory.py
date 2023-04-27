@@ -28,8 +28,8 @@ def draw(coefficents, points):
         yList.append(elementsY)
 
     fig, ax = plot.subplots()
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
+    ax.set_xlim(-100, 100)
+    ax.set_ylim(-100, 100)
     line = ax.plot(points[0][0], points[0][1])[0]
     line.set_xdata(x_points)
     line.set_ydata(yList)
