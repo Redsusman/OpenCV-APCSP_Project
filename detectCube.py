@@ -109,11 +109,13 @@ def run():
                 axis, correctRvec, pose[1], mtx, dist)
             
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
-            drawBox(filter, axis, imagePoints, (255, 0, 0))
+            drawBox(filter, axis, secondImagePoints, (255, 0, 0))
 
-            points = np.array([(0,0), (pose[1][0], pose[1][2])], dtype=np.float32)
+            print(pose[1][0].shape)
+
 
             if key.is_pressed('t'):
+                points = np.array([(0,0), (pose[1][0].item(), pose[1][2].item())], dtype=np.float32)
                 coefficents = traj.generateLinearTrajectory(points)
                 traj.draw(coefficents, points)
         

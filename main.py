@@ -2,7 +2,7 @@ import keyboard as key
 import detectCone
 import detectCube
 import cameraCalibration as calib
-import linearTrajectory as lt
+
 
 
 while True:

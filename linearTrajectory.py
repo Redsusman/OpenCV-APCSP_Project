@@ -37,5 +37,3 @@ def draw(coefficents, points):
     # animation = plot.plot(x_points, yList)
     anim = FuncAnimation(fig, func=line.set_data, frames=np.arange(0, 10, 0.01),  interval=1000)
     plot.show()
-
-
