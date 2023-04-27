@@ -28,23 +28,14 @@ def draw(coefficents, points):
         yList.append(elementsY)
 
     fig, ax = plot.subplots()
-
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)
-
     line = ax.plot(points[0][0], points[0][1])[0]
-
     line.set_xdata(x_points)
     line.set_ydata(yList)
     
     # animation = plot.plot(x_points, yList)
     anim = FuncAnimation(fig, func=line.set_data, frames=np.arange(0, 10, 0.01),  interval=1000)
     plot.show()
-
-points = np.array([(0,0), (13, 6)], dtype=np.float32)
-
-coefficents = generateLinearTrajectory(points)
-
-draw(coefficents, points)
 
 
