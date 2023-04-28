@@ -33,6 +33,7 @@ dist = calib.dist
 tvecs = calib.tvecs
 rvecs = calib.rvecs
 
+
 def distance(objectDimensions, focalLength_mm, objectImageSensor):
     distanceInches = (objectDimensions * focalLength_mm/objectImageSensor)/25.4
     return distanceInches
@@ -86,22 +87,24 @@ def run():
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
             cv2.putText(filter, str([np.degrees(angle) for angle in pose[0]]), (50, 200),
                         cv2.FONT_HERSHEY_COMPLEX, 0.25, (0, 255, 0), 1)
-            
+
             imagePoints, jacobian = cv2.projectPoints(
                 axis, pose[0], pose[1], mtx, dist)
-            
-            correctRvec = correctRotation(pose[0], pose[1], cap, pose[2], 2, jacobian)[2]
+
+            correctRvec = correctRotation(
+                pose[0], pose[1], cap, pose[2], 2, jacobian)[2]
 
             secondImagePoints, jacobian = cv2.projectPoints(
                 axis, correctRvec, pose[1], mtx, dist)
-            
+
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, secondImagePoints, (255, 0, 0))
 
-            points = np.array([(0,0), (pose[1][0].item(), pose[1][2].item())], dtype=np.float32)
+            points = np.array(
+                [(0, 0), (pose[1][0].item(), pose[1][2].item())], dtype=np.float32)
             coefficents = traj.generateLinearTrajectory(points)
             traj.draw(coefficents, points)
-        
+
         cv2.imshow("cube video", filter)
         if cv2.waitKey(1) == ord('q'):
             break
@@ -142,9 +145,9 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers, jacob
         multiple = np.dot(jacobianRot, measurementNoiseCov)
 
         X = np.dot(multiple, jacobianRot.T)
-        X=X.astype(np.float32)
+        X = X.astype(np.float32)
         errorCovPost = X
-        
+
         statePost = np.zeros((9, 1), dtype=np.float32)
 
         kalman_filter.measurementMatrix = measurementMatrix

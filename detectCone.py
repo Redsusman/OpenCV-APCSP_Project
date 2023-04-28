@@ -21,7 +21,7 @@ kernelMatrix = np.multiply(1/256, np.array([
 
 dilationKernel = np.ones((5, 5), np.uint8)
 
-conePointsInches = np.array([(0, 0, 0), (4.1875, 0.25, 0),(
+conePointsInches = np.array([(0, 0, 0), (4.1875, 0.25, 0), (
     8.375, 0.25, 0), (4.1875, 12.8125, 0)], dtype=np.float32)
 
 mtx = calib.mtx
@@ -30,6 +30,7 @@ tvecs = calib.tvecs
 rvecs = calib.rvecs
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
+
 
 def getPose(contours):
     largest_contour = max(contours, key=cv2.contourArea)
@@ -40,16 +41,15 @@ def getPose(contours):
         conePointsInches, imagePoints, mtx, dist, cv2.SOLVEPNP_ITERATIVE)
     return rvec, tvec
 
+
 def getContourCorners(contours):
     intersections = []
     if len(contours) > 1:
         for i in range(0, len(contours) - 1):
-             corners = cv2.intersectConvexConvex(contours[i], contours[i+1])
-             intersections.append(corners)
-    
+            corners = cv2.intersectConvexConvex(contours[i], contours[i+1])
+            intersections.append(corners)
+
     return intersections
-           
-       
 
 
 def run():
@@ -75,22 +75,18 @@ def run():
             if cv2.contourArea(i) > 175:
                 cv2.rectangle(filter, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        
-
         if contours or len(contours) > 0:
             pose = getPose(contours)
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             cv2.putText(filter, str(pose[0]), (0, 50),
-                    cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+                        cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
             print(pose[0])
 
         cv2.imshow("cone video", filter)
         # cv2.imshow("exposure", cv2.convertScaleAbs(filter, dst = 1.5, alpha=1.43))
-
 
         if cv2.waitKey(1) == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
-

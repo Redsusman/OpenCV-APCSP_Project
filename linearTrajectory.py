@@ -9,6 +9,7 @@ import numpy.linalg as lin
 # x, and positive y axes. All these form a 1d tuple of (coefficent1, coefficent 2, theta1, theta).
 # where coefficents1 and 2 represents the equation y=mx+b, m is coefficent1, b is coefficent2.
 
+
 def generateLinearTrajectory(points):
     secondList = points
     x = [secondList[i][0] for i in range(len(secondList))]
@@ -16,9 +17,11 @@ def generateLinearTrajectory(points):
     a, b = np.polyfit(x, y, 1)
     theta = np.degrees(np.arctan(a))
     secondTheta = 90 - theta
-    return a,b,theta,secondTheta
+    return a, b, theta, secondTheta
 
 # simulate linear trajectories between points using matplotlib graph
+
+
 def draw(coefficents, points):
     yList = []
     x_points = np.linspace(points[0][0], points[1][0], 50)
@@ -34,7 +37,6 @@ def draw(coefficents, points):
     line = ax.plot(points[0][0], points[0][1])[0]
     line.set_data(x_points, yList)
     ax.relim()
-    anim = FuncAnimation(fig, func=line, frames=np.arange(0, 100),  interval=100)
+    anim = FuncAnimation(
+        fig, func=line, frames=np.arange(0, 100),  interval=100)
     plot.pause(0.01)
-   
-
