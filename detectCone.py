@@ -31,19 +31,6 @@ rvecs = calib.rvecs
 
 # find the xy(later z) coordinates of an tracked object relative to the camera.
 
-def getCoordinatesInches(contours):
-    array = []
-    for i in contours:
-        moments = cv2.moments(i)
-        if moments["m00"] != 0:
-            center_x = int(moments["m10"]/moments["m00"])
-            center_y = int(moments["m01"]/moments["m00"])
-            center_distance = (center_y/64)/np.sin(np.radians(7))
-            array = [center_x/64, center_y/64, center_distance]
-            return array
-    return array
-
-
 def getPose(contours):
     largest_contour = max(contours, key=cv2.contourArea)
     (x, y, w, h) = cv2.boundingRect(largest_contour)

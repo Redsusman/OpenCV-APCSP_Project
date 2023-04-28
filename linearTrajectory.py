@@ -27,13 +27,14 @@ def draw(coefficents, points):
         elementsY = (coefficents[0] * x) + coefficents[1]
         yList.append(elementsY)
 
-    fig, ax = plot.subplots()
+    fig = plot.gcf()
+    ax = fig.gca()
     ax.set_xlim(-100, 100)
     ax.set_ylim(-100, 100)
     line = ax.plot(points[0][0], points[0][1])[0]
-    line.set_xdata(x_points)
-    line.set_ydata(yList)
-    
-    # animation = plot.plot(x_points, yList)
-    anim = FuncAnimation(fig, func=line.set_data, frames=np.arange(0, 10, 0.01),  interval=1000)
-    plot.show()
+    line.set_data(x_points, yList)
+    ax.relim()
+    anim = FuncAnimation(fig, func=line, frames=np.arange(0, 100),  interval=100)
+    plot.pause(0.01)
+   
+

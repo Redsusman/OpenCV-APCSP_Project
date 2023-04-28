@@ -4,7 +4,7 @@ import numpy.linalg as lin
 import cameraCalibration as calib
 import keyboard as key
 import linearTrajectory as traj
-
+import matplotlib.pyplot as plot
 
 # used to control what color the camera should be looking, this interval can detect, say a purple cube.
 # hopefully I can use a trained HaarCascadeClasifier xml for better tracking.
@@ -32,19 +32,6 @@ mtx = calib.mtx
 dist = calib.dist
 tvecs = calib.tvecs
 rvecs = calib.rvecs
-
-def getCoordinatesInches(contours):
-    array = []
-    for i in contours:
-        moments = cv2.moments(i)
-        if moments["m00"] != 0:
-            center_x = int(moments["m10"]/moments["m00"])
-            center_y = int(moments["m01"]/moments["m00"])
-            center_distance = (center_y/64)/np.sin(np.radians(7))
-            array = [center_x/64, center_y/64, center_distance]
-            return array
-    return array
-
 
 def distance(objectDimensions, focalLength_mm, objectImageSensor):
     distanceInches = (objectDimensions * focalLength_mm/objectImageSensor)/25.4
@@ -113,14 +100,11 @@ def run():
 
             print(pose[1][0].shape)
 
-
-            if key.is_pressed('t'):
-                points = np.array([(0,0), (pose[1][0].item(), pose[1][2].item())], dtype=np.float32)
-                coefficents = traj.generateLinearTrajectory(points)
-                traj.draw(coefficents, points)
+            points = np.array([(0,0), (pose[1][0].item(), pose[1][2].item())], dtype=np.float32)
+            coefficents = traj.generateLinearTrajectory(points)
+            traj.draw(coefficents, points)
         
         cv2.imshow("cube video", filter)
-
         if cv2.waitKey(1) == ord('q'):
             break
 
@@ -178,6 +162,7 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers, jacob
             prediction = kalman_filter.predict()
             kalman_filter.correct(measurement)
             estimate = kalman_filter.correct(measurement)
+            kalman_filter.errorCovPost = errorCovPost
 
         final_estimate = prediction[:3, :3]
         final_estimate = final_estimate.astype(type(tvec[0][0]))
