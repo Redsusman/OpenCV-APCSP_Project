@@ -98,8 +98,6 @@ def run():
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, secondImagePoints, (255, 0, 0))
 
-            print(pose[1][0].shape)
-
             points = np.array([(0,0), (pose[1][0].item(), pose[1][2].item())], dtype=np.float32)
             coefficents = traj.generateLinearTrajectory(points)
             traj.draw(coefficents, points)
