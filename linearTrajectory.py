@@ -18,10 +18,10 @@ def generateLinearTrajectory(points):
     secondTheta = 90 - theta
     return a,b,theta,secondTheta
 
-# simulate drivetrain moving towards a point using matplotlib graph
+# simulate linear trajectories between points using matplotlib graph
 def draw(coefficents, points):
     yList = []
-    x_points = np.linspace(points[0][0], points[1][0], 10)
+    x_points = np.linspace(points[0][0], points[1][0], 50)
 
     for x in x_points:
         elementsY = (coefficents[0] * x) + coefficents[1]
