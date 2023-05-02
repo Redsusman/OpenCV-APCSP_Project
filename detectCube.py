@@ -45,7 +45,7 @@ def getPose(contours):
     imagePoints = np.array(
         [(x, y), (x, y+h), (x+w, y+h), (x+w, y)], dtype=np.float32)
     ret, rvec, tvec, inliers = cv2.solvePnPRansac(
-        cubePointsInches, imagePoints, mtx, dist, iterationsCount=100, reprojectionError=2.00, confidence=0.9, flags=cv2.SOLVEPNP_ITERATIVE)
+        cubePointsInches, imagePoints, mtx, dist, iterationsCount=100, reprojectionError=2.00, confidence=0.9)
     rvec2, tvec2 = cv2.solvePnPRefineLM(
         cubePointsInches, imagePoints, mtx, dist, rvec, tvec)
     rvec2, _ = cv2.Rodrigues(rvec2)
@@ -92,7 +92,7 @@ def run():
                 axis, pose[0], pose[1], mtx, dist)
 
             correctRvec = correctRotation(
-                pose[0], pose[1], cap, pose[2], 2, jacobian)[2]
+                pose[0], pose[1], cap, pose[2], 2, jacobian)[3]
 
             secondImagePoints, jacobian = cv2.projectPoints(
                 axis, correctRvec, pose[1], mtx, dist)
@@ -100,10 +100,10 @@ def run():
             cv2.drawFrameAxes(filter, mtx, dist, pose[0], pose[1], 20, 10)
             drawBox(filter, axis, secondImagePoints, (255, 0, 0))
 
-            points = np.array(
-                [(0, 0), (pose[1][0].item(), pose[1][2].item())], dtype=np.float32)
-            coefficents = traj.generateLinearTrajectory(points)
-            traj.draw(coefficents, points)
+            # points = np.array(
+            #     [(0, 0), (pose[1][0].item(), pose[1][2].item())], dtype=np.float32)
+            # coefficents = traj.generateLinearTrajectory(points)
+            # traj.draw(coefficents, points)
 
         cv2.imshow("cube video", filter)
         if cv2.waitKey(1) == ord('q'):
@@ -145,6 +145,8 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers, jacob
         multiple = np.dot(jacobianRot, measurementNoiseCov)
 
         X = np.dot(multiple, jacobianRot.T)
+
+
         X = X.astype(np.float32)
         errorCovPost = X
 
@@ -159,11 +161,12 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers, jacob
         kalman_filter.statePre = statePre
         kalman_filter.statePost = statePost
 
-        for _ in range(1000):
+
+        for _ in range(5000):
             prediction = kalman_filter.predict()
             kalman_filter.correct(measurement)
             estimate = kalman_filter.correct(measurement)
-            kalman_filter.errorCovPost = errorCovPost
+            # kalman_filter.errorCovPost = errorCovPost
 
         final_estimate = prediction[:3, :3]
         final_estimate = final_estimate.astype(type(tvec[0][0]))
