@@ -42,7 +42,10 @@ public class Matrix {
     }
 
     /**
-     * populate a empty matrix with a list of values, by 1d array. The different shapes between the list and matrix will automatically handled by this function
+     * populate a empty matrix with a list of values, by 1d array. The different
+     * shapes between the list and matrix will automatically handled by this
+     * function
+     * 
      * @param matrix
      * @param list
      */
@@ -59,7 +62,8 @@ public class Matrix {
      * @param list
      * @param rows
      * @param columns
-     * @return a constructed matrix with rows*columns shape, with values in matrix filled by 1d array.
+     * @return a constructed matrix with rows*columns shape, with values in matrix
+     *         filled by 1d array.
      */
     public static Matrix createMatrix(double[] list, int rows, int columns) {
         Matrix ret = new Matrix(rows, columns);
@@ -81,7 +85,8 @@ public class Matrix {
     /**
      * 
      * @param list
-     * @return a Matrix object with the baseMatrix being the inputed dimensional list
+     * @return a Matrix object with the baseMatrix being the inputed dimensional
+     *         list
      */
     public static Matrix createMatrixFromList(double[][] list) {
         Matrix ret = new Matrix(list.length, list[0].length);
@@ -99,8 +104,8 @@ public class Matrix {
     public Matrix add(Matrix base, Matrix other) throws IOException {
         Matrix sum = new Matrix(base.rows, base.columns);
         if ((base.rows == other.rows) && (base.columns == other.columns)) {
-            for (int i = 0; i < base.columns; i++) {
-                for (int j = i; j < base.rows; j++) {
+            for (int i = 0; i < base.rows; i++) {
+                for (int j = 0; j < base.columns; j++) {
                     sum.baseMatrix[i][j] = base.baseMatrix[i][j] + other.baseMatrix[i][j];
                 }
             }
@@ -121,8 +126,8 @@ public class Matrix {
     public Matrix subtract(Matrix base, Matrix other) throws IOException {
         Matrix difference = new Matrix(base.rows, base.columns);
         if ((base.rows == other.rows) && (base.columns == other.columns)) {
-            for (int i = 0; i < base.columns; i++) {
-                for (int j = i; j < base.rows; j++) {
+            for (int i = 0; i < base.rows; i++) {
+                for (int j = 0; j < base.columns; j++) {
                     difference.baseMatrix[i][j] = base.baseMatrix[i][j] - other.baseMatrix[i][j];
                 }
             }
@@ -134,18 +139,31 @@ public class Matrix {
     }
 
     /**
-     * reconstructs a matrix with a different shape. I.e: convert a 6*2 matrix into a 12*1 matrix.
+     * reconstructs a matrix with a different shape. I.e: convert a 6*2 matrix into
+     * a 3*4 matrix, the reshape rows and columns should be multiples of the original matrix, or equals
+     * the product between the rows and columns of the original matrix, i.e, reconstructing a 3*4
+     * to a 6*2 matrix works because 3*4, and 6*2 = 12.
+     * 
      * @param matrix
      * @param length
      */
-    public void reshape(Matrix matrix, int length) {
-        matrix.baseMatrix = Arrays.copyOf(matrix.baseMatrix, length);
+    public Matrix reshape(Matrix matrix, int rows, int columns) {
+        Matrix blank = new Matrix(rows, columns);
+        for(int i = 0, k = 0; i < matrix.rows && k < blank.rows; i++, k++) {
+            for(int j = 0, c = 0; j < matrix.columns && c < blank.columns; j++, c++) {
+                blank.baseMatrix[i][j] = matrix.baseMatrix[k][c];
+            }
+        }
+
+        return blank;
     }
 
     /**
      * 
-     * @param n number to specify the rows, or columns, doesn't matter both will form a square n*n.
-     * @return a square matrix with 1's filling the diagonals only, and the rest with 0's.
+     * @param n number to specify the rows, or columns, doesn't matter both will
+     *          form a square n*n.
+     * @return a square matrix with 1's filling the diagonals only, and the rest
+     *         with 0's.
      */
     public static Matrix eye(int n) {
         Matrix eye = new Matrix(n, n);
@@ -182,9 +200,10 @@ public class Matrix {
      * 
      * @param matrix
      * @param constant
-     * @return a matrix with all values multiplied by a single numerical constant, useful if not multuplying by another matrix.
+     * @return a matrix with all values multiplied/scaled by a single numerical
+     *         constant, useful if not multuplying by another matrix.
      */
-    public Matrix identity(Matrix matrix, double constant) {
+    public Matrix scale(Matrix matrix, double constant) {
         for (int i = 0; i < matrix.rows; i++) {
             for (int j = 0; j < matrix.columns; j++) {
                 matrix.baseMatrix[i][j] *= constant;
@@ -198,7 +217,8 @@ public class Matrix {
      * @param matrix
      * @param other
      * @return division between two matrices
-     * @throws IOException if Matrix A doesn't have the same number of rows as Matrix B.
+     * @throws IOException if Matrix A doesn't have the same number of rows as
+     *                     Matrix B.
      */
     public Matrix divide(Matrix matrix, Matrix other) throws IOException {
         Matrix ret = new Matrix(matrix.rows, matrix.columns);
@@ -219,23 +239,27 @@ public class Matrix {
     /**
      * 
      * @param matrix
-     * @return returns a matrix, with the column values as the row values, and vice versa.
+     * @return returns a matrix, with the column values as the row values, and vice
+     *         versa.
      */
     public Matrix transpose(Matrix matrix) {
-        Matrix ret = new Matrix(matrix.getRows(), matrix.getColumns());
-        for (int i = 0; i < matrix.getRows(); i++) {
-            for (int j = 0; j < matrix.getColumns(); j++) {
+        Matrix ret = new Matrix(matrix.getColumns(), matrix.getRows());
+        for (int i = 0; i < matrix.columns; i++) {
+            for (int j = 0; j < matrix.rows; j++) {
                 ret.baseMatrix[i][j] = matrix.baseMatrix[j][i];
             }
         }
         return ret;
     }
-/**
- * 
- * @param matrix
- * @return get the determinant, or the difference between the cross-products of the two diagonals of a matrix
- * @throws IOException if the matrix doesn't have square dimensions, i.e: (2*2), (3*3), not (3*2)
- */
+
+    /**
+     * 
+     * @param matrix
+     * @return get the determinant, or the difference between the cross-products of
+     *         the two diagonals of a matrix
+     * @throws IOException if the matrix doesn't have square dimensions, i.e: (2*2),
+     *                     (3*3), not (3*2)
+     */
     public double determinant(Matrix matrix) throws IOException {
 
         if (matrix.rows == matrix.columns) {
@@ -254,14 +278,17 @@ public class Matrix {
             throw new IOException("must be a square matrix, i.e: (1*1), (2*2), (3*3)...");
         }
     }
-/**
- * 
- * @param rows
- * @param columns
- * @param constant
- * @return create a x*y matrix, with all values filled with the inputed constant,
- * example: rows = 3, columns = 2, constant = 4 creates a 3*2 matrix filled with 4's
- */
+
+    /**
+     * 
+     * @param rows
+     * @param columns
+     * @param constant
+     * @return create a x*y matrix, with all values filled with the inputed
+     *         constant,
+     *         example: rows = 3, columns = 2, constant = 4 creates a 3*2 matrix
+     *         filled with 4's
+     */
     public static Matrix constantMatrix(int rows, int columns, double constant) {
         Matrix ret = new Matrix(rows, columns);
         for (int i = 0; i < rows; i++) {
@@ -281,7 +308,7 @@ public class Matrix {
     public Matrix inverse(Matrix matrix) throws IOException {
         double inverseCoefficent = 1 / determinant(matrix);
         Matrix diagonalMatrix = adjugate(matrix);
-        Matrix inverseMatrix = diagonalMatrix.identity(diagonalMatrix, inverseCoefficent);
+        Matrix inverseMatrix = diagonalMatrix.scale(diagonalMatrix, inverseCoefficent);
         return inverseMatrix;
     }
 
@@ -302,15 +329,11 @@ public class Matrix {
     }
 
     public static void main(String[] args) throws IOException {
-        double[][] list = { { 3, 5 }, { -7, 2 } };
-        double[][] listTwo = { { 1, 1 }, { 1, 1 } };
-
-        Matrix matrix = Matrix.createMatrixFromList(list);
-        Matrix matrixTwo = Matrix.createMatrixFromList(listTwo);
-
-        Matrix inverse = matrix.inverse(matrix);
-
-        System.out.println(Arrays.deepToString(inverse.baseMatrix));
+       double[][] list = {{1, 2}, {3, 4}, {5, 3}, {5, 6}, {9, 3}, {10, 4}};
+       Matrix matrix = Matrix.createMatrixFromList(list);
+       Matrix reshape = matrix.reshape(matrix, 4,3);
+       System.out.println(Arrays.deepToString(reshape.baseMatrix));
+       System.out.println(6%2);
     }
 
 }
