@@ -1,8 +1,7 @@
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-
-import javax.print.SimpleDoc;
-import javax.swing.text.SimpleAttributeSet;
+import java.util.List;
 
 public class Matrix {
 
@@ -140,8 +139,10 @@ public class Matrix {
 
     /**
      * reconstructs a matrix with a different shape. I.e: convert a 6*2 matrix into
-     * a 3*4 matrix, the reshape rows and columns should be multiples of the original matrix, or equals
-     * the product between the rows and columns of the original matrix, i.e, reconstructing a 3*4
+     * a 3*4 matrix, the reshape rows and columns should be multiples of the
+     * original matrix, or equals
+     * the product between the rows and columns of the original matrix, i.e,
+     * reconstructing a 3*4
      * to a 6*2 matrix works because 3*4, and 6*2 = 12.
      * 
      * @param matrix
@@ -149,12 +150,9 @@ public class Matrix {
      */
     public Matrix reshape(Matrix matrix, int rows, int columns) {
         Matrix blank = new Matrix(rows, columns);
-        for(int i = 0, k = 0; i < matrix.rows && k < blank.rows; i++, k++) {
-            for(int j = 0, c = 0; j < matrix.columns && c < blank.columns; j++, c++) {
-                blank.baseMatrix[i][j] = matrix.baseMatrix[k][c];
-            }
+        for (int i = 0, j = 0; i < matrix.rows && j < blank.rows; i++, j++) {
+            blank.baseMatrix[j] = Arrays.copyOf(matrix.baseMatrix[i], columns);
         }
-
         return blank;
     }
 
@@ -279,6 +277,17 @@ public class Matrix {
         }
     }
 
+    public static void unravel(double[][] dimensionalArray) {
+        List<Double> list = new ArrayList<>();
+        for (int i = 0, j = 0; i < dimensionalArray.length
+                ; i++) {
+
+            list.add(dimensionalArray[i][j]);
+
+        }
+
+    }
+
     /**
      * 
      * @param rows
@@ -329,11 +338,9 @@ public class Matrix {
     }
 
     public static void main(String[] args) throws IOException {
-       double[][] list = {{1, 2}, {3, 4}, {5, 3}, {5, 6}, {9, 3}, {10, 4}};
-       Matrix matrix = Matrix.createMatrixFromList(list);
-       Matrix reshape = matrix.reshape(matrix, 4,3);
-       System.out.println(Arrays.deepToString(reshape.baseMatrix));
-       System.out.println(6%2);
+        double[][] list = { { 1, 2 }, { 3, 4 }, { 5, 3 }, { 5, 6 }, { 9, 3 }, { 10, 4 } };
+        Matrix.unravel(list);
+        System.out.println(Arrays.deepToString(list));
     }
 
 }
