@@ -53,7 +53,16 @@ public class Matrix {
             int index = 0;
             for (int i = 0; i < matrix.rows; i++) {
                 for (int j = 0; j < matrix.columns; j++) {
-                    matrix.baseMatrix[i][j] = list[index++];
+                    if(matrix.baseMatrix[i][j] == 0) {
+                        if(list[index] != 0) {
+                        matrix.baseMatrix[i][j] = list[index++];
+                        } else {
+                            matrix.baseMatrix[i][j] = list[index++];
+                        }
+                    }
+                    if(index > list.length) {
+                        matrix.baseMatrix[i][j] = 0;
+                    }
                 }
             }
         } else {
