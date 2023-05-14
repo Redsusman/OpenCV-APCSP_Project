@@ -147,7 +147,7 @@ public class Matrix {
      * 
      * @param matrix
      * @param length
-     * @throws IOException
+     * @throws IOException if shapes aren't compatible to change.
      */
     public Matrix reshape(Matrix matrix, int rows, int columns) throws IOException {
         Matrix blank = new Matrix(rows, columns);
