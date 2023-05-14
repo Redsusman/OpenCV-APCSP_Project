@@ -237,7 +237,7 @@ public class Matrix {
      * @param matrix
      * @param constant
      * @return a matrix with all values multiplied/scaled by a single numerical
-     *         constant, useful if not multuplying by another matrix.
+     *         constant, useful if not multiplying by another matrix.
      */
     public Matrix scale(Matrix matrix, double constant) {
         for (int i = 0; i < matrix.rows; i++) {
