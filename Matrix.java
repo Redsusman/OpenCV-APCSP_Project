@@ -54,11 +54,11 @@ public class Matrix {
             for (int i = 0; i < matrix.rows; i++) {
                 for (int j = 0; j < matrix.columns; j++) {
                     matrix.baseMatrix[i][j] = list[index++];
-                    System.out.println(matrix.baseMatrix[i][j]);
                      if (index >= list.length) {
-                         matrix.baseMatrix[i][j] = 0;
-                         index = list.length - 1;
-                         list[list.length - 1] = 0;
+                         matrix.baseMatrix[i][j] = list[list.length - 1];
+                         index = list.length-1;
+                         list[index] = 0;
+                        //  list[list.length - 1] = 0;
                      }
                 }
             }
@@ -408,6 +408,9 @@ public class Matrix {
         Matrix matrix = new Matrix(3, 4);
         double[] list = { 1, 2, 3, 4, 5 };
         matrix.fill(matrix, list);
+
+                System.out.println(Arrays.deepToString(matrix.baseMatrix));
+            
     }
 
 }
