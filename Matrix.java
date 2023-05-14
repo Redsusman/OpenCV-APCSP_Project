@@ -48,11 +48,16 @@ public class Matrix {
      * @param matrix
      * @param list
      */
-    public void fill(Matrix matrix, double[] list) {
-        for (int i = 0; i < matrix.rows; i++) {
-            for (int j = 0; j < matrix.columns; j++) {
-                matrix.baseMatrix[i][j] = list[j];
+    public void fill(Matrix matrix, double[] list) throws IOException {
+        if (list.length < matrix.rows * matrix.columns) {
+            int index = 0;
+            for (int i = 0; i < matrix.rows; i++) {
+                for (int j = 0; j < matrix.columns; j++) {
+                    matrix.baseMatrix[i][j] = list[index++];
+                }
             }
+        } else {
+            throw new IOException("cannot fill this matrix with uneven values to rows and columns");
         }
     }
 
@@ -63,8 +68,9 @@ public class Matrix {
      * @param columns
      * @return a constructed matrix with rows*columns shape, with values in matrix
      *         filled by 1d array.
+     * @throws IOException
      */
-    public static Matrix createMatrix(double[] list, int rows, int columns) {
+    public static Matrix createMatrix(double[] list, int rows, int columns) throws IOException {
         Matrix ret = new Matrix(rows, columns);
         ret.fill(ret, list);
         return ret;
@@ -90,6 +96,14 @@ public class Matrix {
     public static Matrix createMatrixFromList(double[][] list) {
         Matrix ret = new Matrix(list.length, list[0].length);
         ret.baseMatrix = list;
+        return ret;
+    }
+
+    public static Matrix createMatrix1dArray(double[] list) {
+        Matrix ret = new Matrix(1, list.length);
+        for (int i = 0; i < list.length; i++) {
+            ret.baseMatrix[0][i] = list[i];
+        }
         return ret;
     }
 
@@ -280,15 +294,21 @@ public class Matrix {
             double secondDiagonalProduct = 1;
             for (int i = 0; i < matrix.getColumns(); i++) {
                 diagonalProduct *= matrix.baseMatrix[i][i];
+
             }
             for (int i = 0, j = matrix.baseMatrix[0].length - 1; i < matrix.baseMatrix.length && j >= 0; i++, j--) {
                 secondDiagonalProduct *= matrix.baseMatrix[i][j];
+
             }
             ret = diagonalProduct - secondDiagonalProduct;
             return ret;
         } else {
             throw new IOException("must be a square matrix, i.e: (1*1), (2*2), (3*3)...");
         }
+    }
+
+    public double determinantLargerValue() {
+        return 2;
     }
 
     public static double[] unravel(double[][] dimensionalArray) {
@@ -322,6 +342,10 @@ public class Matrix {
         return ret;
     }
 
+    public Matrix[] cofactor(Matrix matrix) {
+        return null;
+    }
+
     /**
      * 
      * @param matrix
@@ -330,6 +354,7 @@ public class Matrix {
      */
     public Matrix inverse(Matrix matrix) throws IOException {
         double inverseCoefficent = 1 / determinant(matrix);
+        System.out.println(inverseCoefficent);
         Matrix diagonalMatrix = adjugate(matrix);
         Matrix inverseMatrix = diagonalMatrix.scale(diagonalMatrix, inverseCoefficent);
         return inverseMatrix;
@@ -352,12 +377,26 @@ public class Matrix {
     }
 
     public static void main(String[] args) throws IOException {
-        double[][] list = {{4, 3}, {3, 2}};
+        double[][] list = { { 1, 0, 4, 6 }, { 2, 5, 0, 3 }, { -1, 2, 3, 5 }, { 2, 1, -2, 3 } };
+        double[] array = { 1, 3, 5, 7 };
         Matrix matrix = Matrix.createMatrixFromList(list);
+        // double determinant = matrix.determinant(matrix);
+        Matrix reshape = matrix.reshape(matrix, 2, 8);
         Matrix inverse = matrix.inverse(matrix);
-        Matrix reshape = inverse.reshape(inverse, 4, 1);
 
-        System.out.println(Arrays.deepToString(reshape.getBaseMatrix()));
+        Matrix[] matrices = new Matrix[4];
+
+        double determinant = 0;
+        for (int i = 0; i < matrix.columns; i++) {
+            matrices[i] = Matrix.createMatrix1dArray(matrix.baseMatrix[i]);
+            matrices[i] = matrix.reshape(matrices[i], 2, 2);
+            System.out.println(Arrays.deepToString(matrices[i].baseMatrix));
+            determinant += matrix.determinant(matrices[i]);
+            System.out.println(determinant);
+        }
+        Matrix mat = Matrix.createMatrix1dArray(array);
+
+        System.out.println(determinant);
     }
 
 }

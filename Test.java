@@ -4,24 +4,22 @@ import java.util.List;
 
 public class Test {
 
-    static double[] list = {3, 4, 6 ,9,  3, 3, 3, 3, 3, 3};
-    static double[][] dim = new double[3][3];
-    static double[] copy = new double[list.length];
+    
 
 
     public static void main(String args[]) {
-     
-      int index = 0;
-      for(int i = 0; i < dim.length; i++) {
+      System.out.println(cofactorPossible(5));
+    }
 
-        for(int j = 0; j < dim[0].length; j++) {
-          dim[i][j] = list[index++];
-          System.out.println(index);
-        }
+    public static double cofactorPossible(int rows) {
+      double first = 1;
+      double sum = 1;
+      for(int i = rows; i >= 2; i--) {
+        first = sum * (i-1) * i;
+        sum += first;
+        System.out.println(sum);
       }
-      // System.out.println(array);
-      System.out.println(Arrays.deepToString(dim));
-      System.out.print(dim);
+      return sum;
     }
 
 }
