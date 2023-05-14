@@ -147,10 +147,13 @@ public class Matrix {
      * 
      * @param matrix
      * @param length
+     * @throws IOException
      */
-    public Matrix reshape(Matrix matrix, int rows, int columns) {
+    public Matrix reshape(Matrix matrix, int rows, int columns) throws IOException {
         Matrix blank = new Matrix(rows, columns);
+        System.out.println(matrix.rows * matrix.columns);
         try {
+            if(rows * columns == matrix.rows * matrix.columns) {
             double[] unravel = Matrix.unravel(matrix.baseMatrix);
             int index = 0;
             for (int i = 0; i < blank.rows; i++) {
@@ -158,6 +161,9 @@ public class Matrix {
                     blank.baseMatrix[i][j] = unravel[index++];
                 }
             }
+        } else {
+            throw new IOException("reshape isn't compatible with current shape");
+        }
             return blank;
         } catch (IndexOutOfBoundsException e) {
             System.out.println("reshape isn't compatible with current shape");
@@ -349,7 +355,7 @@ public class Matrix {
     public static void main(String[] args) throws IOException {
         double[][] list = { { 1, 2 }, { 3, 4 }, { 5, 3 }, { 5, 6 }, { 9, 3 }, { 10, 4 } };
         Matrix matrix = Matrix.createMatrixFromList(list);
-        Matrix reshape = matrix.reshape(matrix, 4, 3);
+        Matrix reshape = matrix.reshape(matrix, 12, 1);
         System.out.println(Arrays.deepToString(reshape.baseMatrix));
     }
 
