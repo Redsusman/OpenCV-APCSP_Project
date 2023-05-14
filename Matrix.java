@@ -42,7 +42,7 @@ public class Matrix {
 
     /**
      * populate a empty matrix with a list of values, by 1d array. The different
-     * shapes between the list and matrix will automatically handled by this
+     * shapes between the list and matrix will be automatically handled by this
      * function
      * 
      * @param matrix
