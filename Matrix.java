@@ -148,7 +148,8 @@ public class Matrix {
      * @param matrix
      * @param length
      */
-    public Matrix reshape(Matrix matrix, int rows, int columns) {
+    public Matrix reshape(Matrix matrix, int rows, int columns) throws IndexOutOfBoundsException {
+        
         Matrix blank = new Matrix(rows, columns);
         double[] unravel = Matrix.unravel(matrix.baseMatrix);
         int index = 0;
@@ -344,7 +345,7 @@ public class Matrix {
     public static void main(String[] args) throws IOException {
         double[][] list = { { 1, 2 }, { 3, 4 }, { 5, 3 }, { 5, 6 }, { 9, 3 }, { 10, 4 } };
         Matrix matrix = Matrix.createMatrixFromList(list);
-        Matrix reshape = matrix.reshape(matrix, 3, 4);
+        Matrix reshape = matrix.reshape(matrix, 4, 3);
         System.out.println(Arrays.deepToString(reshape.baseMatrix));
     }
 
