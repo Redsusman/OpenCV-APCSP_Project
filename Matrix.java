@@ -61,6 +61,7 @@ public class Matrix {
                         }
                     }
                     if(index > list.length) {
+                        index = 0;
                         matrix.baseMatrix[i][j] = 0;
                     }
                 }
