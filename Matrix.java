@@ -49,7 +49,7 @@ public class Matrix {
      * @param list
      */
     public void fill(Matrix matrix, double[] list) throws IOException {
-        if (list.length < matrix.rows * matrix.columns) {
+        if (list.length-1 < matrix.rows * matrix.columns) {
             int index = 0;
             for (int i = 0; i < matrix.rows; i++) {
                 for (int j = 0; j < matrix.columns; j++) {
@@ -360,7 +360,6 @@ public class Matrix {
      */
     public Matrix inverse(Matrix matrix) throws IOException {
         double inverseCoefficent = 1 / determinant(matrix);
-        System.out.println(inverseCoefficent);
         Matrix diagonalMatrix = adjugate(matrix);
         Matrix inverseMatrix = diagonalMatrix.scale(diagonalMatrix, inverseCoefficent);
         return inverseMatrix;
@@ -383,33 +382,15 @@ public class Matrix {
     }
 
     public static void main(String[] args) throws IOException {
-        // double[][] list = { { 1, 0, 4, 6 }, { 2, 5, 0, 3 }, { -1, 2, 3, 5 }, { 2, 1,
-        // -2, 3 } };
-        // double[] array = { 1, 3, 5, 7 };
-        // Matrix matrix = Matrix.createMatrixFromList(list);
-        // // double determinant = matrix.determinant(matrix);
-        // Matrix reshape = matrix.reshape(matrix, 2, 8);
-        // Matrix inverse = matrix.inverse(matrix);
+   
 
-        // Matrix[] matrices = new Matrix[4];
-
-        // double determinant = 0;
-        // for (int i = 0; i < matrix.columns; i++) {
-        // matrices[i] = Matrix.createMatrix1dArray(matrix.baseMatrix[i]);
-        // matrices[i] = matrix.reshape(matrices[i], 2, 2);
-        // System.out.println(Arrays.deepToString(matrices[i].baseMatrix));
-        // determinant += matrix.determinant(matrices[i]);
-        // System.out.println(determinant);
-        // }
-        // Matrix mat = Matrix.createMatrix1dArray(array);
-
-        // System.out.println(determinant);
-
-        Matrix matrix = new Matrix(3, 4);
-        double[] list = { 1, 2, 3, 4, 5 };
+        Matrix matrix = new Matrix(2,2);
+        Matrix second = new Matrix(2,2);
+        double[] list = {7, 9, 5, 8};
+        double[] listt = {8, 4, 9, 2};
         matrix.fill(matrix, list);
-
-                System.out.println(Arrays.deepToString(matrix.baseMatrix));
+        second.fill(second, listt);
+        double dot = matrix.determinant(matrix);
             
     }
 
