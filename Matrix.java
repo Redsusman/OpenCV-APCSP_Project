@@ -161,7 +161,7 @@ public class Matrix {
             return blank;
         } catch (IndexOutOfBoundsException e) {
             System.out.println("reshape isn't compatible with current shape");
-            return null; // or return a default Matrix object
+            return null;
         }
     }
 
