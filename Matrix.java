@@ -148,17 +148,21 @@ public class Matrix {
      * @param matrix
      * @param length
      */
-    public Matrix reshape(Matrix matrix, int rows, int columns) throws IndexOutOfBoundsException {
-        
+    public Matrix reshape(Matrix matrix, int rows, int columns) {
         Matrix blank = new Matrix(rows, columns);
-        double[] unravel = Matrix.unravel(matrix.baseMatrix);
-        int index = 0;
-        for (int i = 0; i < blank.rows; i++) {
-            for (int j = 0; j < blank.columns; j++) {
-                blank.baseMatrix[i][j] = unravel[index++];
+        try {
+            double[] unravel = Matrix.unravel(matrix.baseMatrix);
+            int index = 0;
+            for (int i = 0; i < blank.rows; i++) {
+                for (int j = 0; j < blank.columns; j++) {
+                    blank.baseMatrix[i][j] = unravel[index++];
+                }
             }
+            return blank;
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("reshape isn't compatible with current shape");
+            return null; // or return a default Matrix object
         }
-        return blank;
     }
 
     /**
