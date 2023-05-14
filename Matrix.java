@@ -150,8 +150,12 @@ public class Matrix {
      */
     public Matrix reshape(Matrix matrix, int rows, int columns) {
         Matrix blank = new Matrix(rows, columns);
-        for (int i = 0, j = 0; i < matrix.rows && j < blank.rows; i++, j++) {
-            blank.baseMatrix[j] = Arrays.copyOf(matrix.baseMatrix[i], columns);
+        double[] unravel = Matrix.unravel(matrix.baseMatrix);
+        int index = 0;
+        for (int i = 0; i < blank.rows; i++) {
+            for (int j = 0; j < blank.columns; j++) {
+                blank.baseMatrix[i][j] = unravel[index++];
+            }
         }
         return blank;
     }
@@ -277,15 +281,15 @@ public class Matrix {
         }
     }
 
-    public static void unravel(double[][] dimensionalArray) {
-        List<Double> list = new ArrayList<>();
-        for (int i = 0, j = 0; i < dimensionalArray.length
-                ; i++) {
-
-            list.add(dimensionalArray[i][j]);
-
+    public static double[] unravel(double[][] dimensionalArray) {
+        int c = 0;
+        double[] unravel = new double[dimensionalArray.length * dimensionalArray[0].length];
+        for (int i = 0; i < dimensionalArray.length; i++) {
+            for (int j = 0; j < dimensionalArray[0].length; j++) {
+                unravel[c++] = dimensionalArray[i][j];
+            }
         }
-
+        return unravel;
     }
 
     /**
@@ -339,8 +343,9 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         double[][] list = { { 1, 2 }, { 3, 4 }, { 5, 3 }, { 5, 6 }, { 9, 3 }, { 10, 4 } };
-        Matrix.unravel(list);
-        System.out.println(Arrays.deepToString(list));
+        Matrix matrix = Matrix.createMatrixFromList(list);
+        Matrix reshape = matrix.reshape(matrix, 3, 4);
+        System.out.println(Arrays.deepToString(reshape.baseMatrix));
     }
 
 }
