@@ -49,17 +49,17 @@ public class Matrix {
      * @param list
      */
     public void fill(Matrix matrix, double[] list) throws IOException {
-        if (list.length-1 < matrix.rows * matrix.columns) {
+        if (list.length - 1 < matrix.rows * matrix.columns) {
             int index = 0;
             for (int i = 0; i < matrix.rows; i++) {
                 for (int j = 0; j < matrix.columns; j++) {
                     matrix.baseMatrix[i][j] = list[index++];
-                     if (index >= list.length) {
-                         matrix.baseMatrix[i][j] = list[list.length - 1];
-                         index = list.length-1;
-                         list[index] = 0;
-                        //  list[list.length - 1] = 0;
-                     }
+                    if (index >= list.length) {
+                        matrix.baseMatrix[i][j] = list[list.length - 1];
+                        index = list.length - 1;
+                        list[index] = 0;
+                        // list[list.length - 1] = 0;
+                    }
                 }
             }
         } else {
@@ -349,7 +349,17 @@ public class Matrix {
     }
 
     public Matrix[] cofactor(Matrix matrix) {
-        return null;
+        // first determine the amount of all cofactor possibilites (row reduction
+        // method), and store that into a
+        // list to store all possible cofactors.
+        double sum = matrix.rows - 1;
+        for (int i = matrix.rows; i > 3; i--) {
+            sum = sum * i;
+        }
+        double ret = sum + rows;
+        Matrix[] possibilities = new Matrix[(int) ret];
+
+        return possibilities;
     }
 
     /**
@@ -382,16 +392,12 @@ public class Matrix {
     }
 
     public static void main(String[] args) throws IOException {
-   
 
-        Matrix matrix = new Matrix(2,2);
-        Matrix second = new Matrix(2,2);
-        double[] list = {7, 9, 5, 8};
-        double[] listt = {8, 4, 9, 2};
-        matrix.fill(matrix, list);
-        second.fill(second, listt);
-        double dot = matrix.determinant(matrix);
-            
+        Matrix m = Matrix.constantMatrix(2, 4, 1);
+        Matrix transpose = m.reshape(m, 4, 2);
+
+        System.out.println(Arrays.deepToString(transpose.baseMatrix));
+
     }
 
 }

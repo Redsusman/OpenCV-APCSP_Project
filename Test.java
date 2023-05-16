@@ -8,7 +8,7 @@ public class Test {
 
 
     public static void main(String args[]) {
-      System.out.println(cofactorPossible(5));
+      // System.out.println(cofactorPossible(5));
        // double[][] list = { { 1, 0, 4, 6 }, { 2, 5, 0, 3 }, { -1, 2, 3, 5 }, { 2, 1,
         // -2, 3 } };
         // double[] array = { 1, 3, 5, 7 };
@@ -30,17 +30,17 @@ public class Test {
         // Matrix mat = Matrix.createMatrix1dArray(array);
 
         // System.out.println(determinant);
+       
     }
 
-    public static double cofactorPossible(int rows) {
-      double first = 1;
-      double sum = 1;
-      for(int i = rows; i >= 2; i--) {
-        first = sum * (i-1) * i;
-        sum += first;
-        System.out.println(sum);
-      }
-      return sum;
-    }
+    // public static double cofactorPossible(int rows) {
+    //   double sum = rows - 1;
+    //   for(int i = rows; i > 3; i--) {
+    //     sum = sum * i;
+    //   }
+    //   double ret = sum + rows;
+    //   return ret;
+    // }
+
 
 }
