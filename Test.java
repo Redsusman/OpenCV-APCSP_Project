@@ -1,46 +1,32 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Test {
 
-    
+    public static void main(String args[]) throws IOException {
+        double[] list = { 3, 4, 5, 3, 1, 2, 7, 8, 3 };
+        Matrix m = Matrix.createMatrix(list, 3, 3);
+        Matrix newMat = new Matrix(m.rows, m.columns);
+        ArrayList<Matrix> arrays = new ArrayList<>();
 
+        for (int i = 0; i < m.rows; i++) {
+            Matrix matrix = new Matrix(m.rows, m.columns);
+            for (int j = 0; j < m.columns; j++) {
+                if ((m.baseMatrix[i][i] != m.baseMatrix[0][j]) && (m.baseMatrix[i][j] != m.baseMatrix[i][0])) {
 
-    public static void main(String args[]) {
-      // System.out.println(cofactorPossible(5));
-       // double[][] list = { { 1, 0, 4, 6 }, { 2, 5, 0, 3 }, { -1, 2, 3, 5 }, { 2, 1,
-        // -2, 3 } };
-        // double[] array = { 1, 3, 5, 7 };
-        // Matrix matrix = Matrix.createMatrixFromList(list);
-        // // double determinant = matrix.determinant(matrix);
-        // Matrix reshape = matrix.reshape(matrix, 2, 8);
-        // Matrix inverse = matrix.inverse(matrix);
+                    matrix.baseMatrix[i][j] = m.baseMatrix[i][j];
+                    arrays.add(matrix);
+                    // newMat.baseMatrix[i][j] = m.baseMatrix[i][j];
 
-        // Matrix[] matrices = new Matrix[4];
+                }
+            }
+        }
 
-        // double determinant = 0;
-        // for (int i = 0; i < matrix.columns; i++) {
-        // matrices[i] = Matrix.createMatrix1dArray(matrix.baseMatrix[i]);
-        // matrices[i] = matrix.reshape(matrices[i], 2, 2);
-        // System.out.println(Arrays.deepToString(matrices[i].baseMatrix));
-        // determinant += matrix.determinant(matrices[i]);
-        // System.out.println(determinant);
-        // }
-        // Matrix mat = Matrix.createMatrix1dArray(array);
-
-        // System.out.println(determinant);
-       
+        for (Matrix mat : arrays) {
+            System.out.println(Arrays.deepToString(mat.baseMatrix));
+        }
     }
-
-    // public static double cofactorPossible(int rows) {
-    //   double sum = rows - 1;
-    //   for(int i = rows; i > 3; i--) {
-    //     sum = sum * i;
-    //   }
-    //   double ret = sum + rows;
-    //   return ret;
-    // }
-
 
 }

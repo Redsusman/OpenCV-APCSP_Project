@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Matrix {
@@ -348,18 +349,39 @@ public class Matrix {
         return ret;
     }
 
-    public Matrix[] cofactor(Matrix matrix) {
-        // first determine the amount of all cofactor possibilites (row reduction
-        // method), and store that into a
-        // list to store all possible cofactors.
-        double sum = matrix.rows - 1;
-        for (int i = matrix.rows; i > 3; i--) {
-            sum = sum * i;
-        }
-        double ret = sum + rows;
-        Matrix[] possibilities = new Matrix[(int) ret];
+    public ArrayList<Matrix> cofactor(Matrix matrix) throws IOException {
 
-        return possibilities;
+        ArrayList<Matrix> storedPossibilites = new ArrayList<>();
+        int rowCheck = 0;
+        rowCheck++;
+
+        for (int i = 0; i < matrix.rows; i++) {
+            for (int j = 0; j < matrix.columns; j++) {
+                int index = 0;
+                index++;
+                Matrix possibility = new Matrix(matrix.rows - 1, matrix.columns - 1);
+                ArrayList<Double> list = new ArrayList<>();
+                if ((matrix.baseMatrix[i][j] != matrix.baseMatrix[0][j])
+                        && (matrix.baseMatrix[i][j] != matrix.baseMatrix[i][i])) {
+                    list.add(matrix.baseMatrix[i][j]);
+                    double[] doubleList = list.stream().mapToDouble(Double::doubleValue).toArray();
+                    possibility.fill(possibility, doubleList);
+                }
+                storedPossibilites.add(possibility);
+            }
+
+            int rowChecker = matrix.rows - rowCheck;
+
+            if (storedPossibilites.get(storedPossibilites.size() - 1).rows != 2) {
+                for (Matrix possibility : storedPossibilites) {
+                    if (possibility.rows == rowChecker)
+                        cofactor(possibility);
+                }
+            }
+
+        }
+
+        return storedPossibilites;
     }
 
     /**
@@ -392,11 +414,14 @@ public class Matrix {
     }
 
     public static void main(String[] args) throws IOException {
+        double[] list = { 2, 4, 7, 6 };
+        Matrix matrix = Matrix.createMatrix(list, 2, 2);
+        Matrix inverse = matrix.inverse(matrix);
+        System.out.println(Arrays.deepToString(inverse.baseMatrix));
 
-        Matrix m = Matrix.constantMatrix(2, 4, 1);
-        Matrix transpose = m.reshape(m, 4, 2);
+        LinkedList<Matrix> listerr = new LinkedList<>();
 
-        System.out.println(Arrays.deepToString(transpose.baseMatrix));
+    
 
     }
 
