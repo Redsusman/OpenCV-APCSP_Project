@@ -1,8 +1,17 @@
+import java.beans.Expression;
 import java.io.IOException;
+import java.lang.management.ManagementPermission;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.function.Function;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 public class Matrix {
 
@@ -349,16 +358,27 @@ public class Matrix {
         return ret;
     }
 
+    public static Matrix randomMatrix(int rows, int columns, int[] range, boolean roundVal) {
+        Matrix ret = new Matrix(rows, columns);
+        for(int i = 0; i < rows; i++) {
+            for(int j = 0; j < columns; j++) {
+                double randomVal = Math.random() * (range[1] - range[0]) + range[0];
+                randomVal = roundVal ? (int) Math.round(randomVal) : randomVal;
+                ret.baseMatrix[i][j] = randomVal;
+            }
+        }
+        return ret;
+    }
+
     public ArrayList<Matrix> cofactor(Matrix matrix) throws IOException {
 
         ArrayList<Matrix> storedPossibilites = new ArrayList<>();
         int rowCheck = 0;
-        rowCheck++;
+        int rowChecker = matrix.rows - rowCheck;
 
         for (int i = 0; i < matrix.rows; i++) {
+            rowCheck++;
             for (int j = 0; j < matrix.columns; j++) {
-                int index = 0;
-                index++;
                 Matrix possibility = new Matrix(matrix.rows - 1, matrix.columns - 1);
                 ArrayList<Double> list = new ArrayList<>();
                 if ((matrix.baseMatrix[i][j] != matrix.baseMatrix[0][j])
@@ -368,14 +388,15 @@ public class Matrix {
                     possibility.fill(possibility, doubleList);
                 }
                 storedPossibilites.add(possibility);
-            }
+                if (storedPossibilites.get(storedPossibilites.size() - 1).rows != 2) {
+                    for (Matrix possibilit : storedPossibilites) {
+                        if (possibilit.rows == rowChecker) {
+                            return cofactor(possibilit);
+                        } else if (rowChecker == 0) {
+                            break;
 
-            int rowChecker = matrix.rows - rowCheck;
-
-            if (storedPossibilites.get(storedPossibilites.size() - 1).rows != 2) {
-                for (Matrix possibility : storedPossibilites) {
-                    if (possibility.rows == rowChecker)
-                        cofactor(possibility);
+                        }
+                    }
                 }
             }
 
@@ -397,6 +418,25 @@ public class Matrix {
         return inverseMatrix;
     }
 
+    public Matrix factor(Matrix matrix) {
+        Matrix ret = new Matrix(matrix.rows, matrix.columns);
+
+        for (int i = 0; i < matrix.rows; i++) {
+            for (int j = 0; j < matrix.columns; j++) {
+                if (matrix.baseMatrix[0][i] == matrix.baseMatrix[0][j]) {
+                    continue;
+                }
+
+           
+                ret.baseMatrix[i][j] = matrix.baseMatrix[i][j];
+                System.out.println(ret.baseMatrix[i][j]);
+            }
+        }
+
+        return ret;
+
+    }
+
     /**
      * 
      * @param matrix
@@ -413,15 +453,48 @@ public class Matrix {
         return ret;
     }
 
+    /**
+     * 
+     * @param function         string of function; this method will automatically
+     *                         convert string text to readable/usable function.
+     * @param interval         interval of two x points, i.e [1, 3];
+     * @param linspaceInterval length of each reiman rectangle on the
+     *                         x-axis-interval, such
+     *                         as 0.002 or 1.
+     * @return the approximated definite integral, for a better approximation,
+     *         reduce the linespaceInterval number closer to 0.
+     */
+    public static double reimanSumIntegral(String function, int[] interval, double linspaceInterval) {
+        char[] convert = function.toCharArray();
+        List<Integer> funcList = new ArrayList<>();
+        List<Double> intervalList = new ArrayList<>();
+        for (double i = interval[0]; i <= interval[1]; i += linspaceInterval) {
+            intervalList.add(i);
+        }
+        // store polynomial digits as integer list.
+
+        for (char letter : convert) {
+            if (Character.isDigit(letter)) {
+                funcList.add(Character.getNumericValue(letter));
+            }
+        }
+        double sum = 0;
+        // calculate the reiman sum.
+        for (double x : intervalList) {
+            for (int i = 0; i < funcList.size() - 1; i++) {
+                double y = funcList.get(i) * Math.pow(x, funcList.get(i + 1));
+                sum += linspaceInterval * y;
+            }
+        }
+        return sum;
+    }
+
     public static void main(String[] args) throws IOException {
-        double[] list = { 2, 4, 7, 6 };
-        Matrix matrix = Matrix.createMatrix(list, 2, 2);
-        Matrix inverse = matrix.inverse(matrix);
-        System.out.println(Arrays.deepToString(inverse.baseMatrix));
-
-        LinkedList<Matrix> listerr = new LinkedList<>();
-
-    
+        int[] range = {1,10};
+        Matrix mat = Matrix.randomMatrix(3, 3, range, true);
+        mat.determinant(mat);
+        System.out.println(Arrays.deepToString(mat.baseMatrix));
+       
 
     }
 
