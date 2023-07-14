@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import javax.script.ScriptEngine;
@@ -360,8 +361,8 @@ public class Matrix {
 
     public static Matrix randomMatrix(int rows, int columns, int[] range, boolean roundVal) {
         Matrix ret = new Matrix(rows, columns);
-        for(int i = 0; i < rows; i++) {
-            for(int j = 0; j < columns; j++) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
                 double randomVal = Math.random() * (range[1] - range[0]) + range[0];
                 randomVal = roundVal ? (int) Math.round(randomVal) : randomVal;
                 ret.baseMatrix[i][j] = randomVal;
@@ -427,7 +428,6 @@ public class Matrix {
                     continue;
                 }
 
-           
                 ret.baseMatrix[i][j] = matrix.baseMatrix[i][j];
                 System.out.println(ret.baseMatrix[i][j]);
             }
@@ -455,8 +455,10 @@ public class Matrix {
 
     /**
      * 
-     * @param function         string of function; this method will automatically
-     *                         convert string text to readable/usable function.
+     * @param function         elementary function, with f(x)dx being continous on
+     *                         the interval.
+     *                         basic syntax: Function<Double, Double> ret = x ->
+     *                         .... ex: Math.sin(x) + 2*x
      * @param interval         interval of two x points, i.e [1, 3];
      * @param linspaceInterval length of each reiman rectangle on the
      *                         x-axis-interval, such
@@ -464,37 +466,36 @@ public class Matrix {
      * @return the approximated definite integral, for a better approximation,
      *         reduce the linespaceInterval number closer to 0.
      */
-    public static double reimanSumIntegral(String function, int[] interval, double linspaceInterval) {
-        char[] convert = function.toCharArray();
-        List<Integer> funcList = new ArrayList<>();
-        List<Double> intervalList = new ArrayList<>();
+    public static double reimanSumIntegral(Function<Double, Double> function, int[] interval, double linspaceInterval) {
+
+        List<Double> intervalList = new LinkedList<>();
         for (double i = interval[0]; i <= interval[1]; i += linspaceInterval) {
             intervalList.add(i);
         }
-        // store polynomial digits as integer list.
-
-        for (char letter : convert) {
-            if (Character.isDigit(letter)) {
-                funcList.add(Character.getNumericValue(letter));
-            }
-        }
         double sum = 0;
-        // calculate the reiman sum.
-        for (double x : intervalList) {
-            for (int i = 0; i < funcList.size() - 1; i++) {
-                double y = funcList.get(i) * Math.pow(x, funcList.get(i + 1));
-                sum += linspaceInterval * y;
+        try {
+            for (var x : intervalList) {
+                double y = function.apply(x);
+                if (!Double.isNaN(y)) {
+                    sum += linspaceInterval * y;
+                } else {
+                    throw new RuntimeException(
+                            "invalid interval, a jump, infinite, or other discontinouty invalidates this interval, use a continous interval");
+                }
             }
+        } catch (ArithmeticException e) {
+            System.out.println("invald interval, some kind of discontinuity in the function");
         }
         return sum;
     }
 
     public static void main(String[] args) throws IOException {
-        int[] range = {1,10};
-        Matrix mat = Matrix.randomMatrix(3, 3, range, true);
-        mat.determinant(mat);
-        System.out.println(Arrays.deepToString(mat.baseMatrix));
-       
+        Function<Double, Double> fx = x -> Math.pow(x, 2) - 4 * x + 2;
+        int[] interval = { 0, 10 };
+        double step = 0.00002;
+
+        var ret = Matrix.reimanSumIntegral(fx, interval, step);
+        System.out.println(ret);
 
     }
 
