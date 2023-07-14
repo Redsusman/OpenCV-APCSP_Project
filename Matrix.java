@@ -464,7 +464,7 @@ public class Matrix {
      *                         x-axis-interval, such
      *                         as 0.002 or 1.
      * @return the approximated definite integral, for a better approximation,
-     *         reduce the linespaceInterval number closer to 0.
+     *         reduce the linespaceInterval number closer to 0, however this will slow down execution if too low of linspace.
      */
     public static double reimanSumIntegral(Function<Double, Double> function, int[] interval, double linspaceInterval) {
 
@@ -479,20 +479,20 @@ public class Matrix {
                 if (!Double.isNaN(y)) {
                     sum += linspaceInterval * y;
                 } else {
-                    throw new RuntimeException(
-                            "invalid interval, a jump, infinite, or other discontinouty invalidates this interval, use a continous interval");
+                    throw new RuntimeException (
+                            y+"invalid interval, a jump, infinite, or other discontinouty invalidates this interval, use a continous interval");
                 }
             }
         } catch (ArithmeticException e) {
-            System.out.println("invald interval, some kind of discontinuity in the function");
+            System.out.println(e+"invald interval, some kind of discontinuity in the function");
         }
         return sum;
     }
 
     public static void main(String[] args) throws IOException {
-        Function<Double, Double> fx = x -> Math.pow(x, 2) - 4 * x + 2;
-        int[] interval = { 0, 10 };
-        double step = 0.00002;
+        Function<Double, Double> fx = x -> Math.pow(x,2);
+        int[] interval = { 0, 5 };
+        double step = 0.00001;
 
         var ret = Matrix.reimanSumIntegral(fx, interval, step);
         System.out.println(ret);
