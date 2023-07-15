@@ -1,18 +1,8 @@
-import java.beans.Expression;
 import java.io.IOException;
-import java.lang.management.ManagementPermission;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
-import java.util.TreeMap;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 public class Matrix {
 
@@ -460,11 +450,12 @@ public class Matrix {
      *                         basic syntax: Function<Double, Double> ret = x ->
      *                         .... ex: Math.sin(x) + 2*x
      * @param interval         interval of two x points, i.e [1, 3];
-     * @param linspaceInterval length of each reiman rectangle on the
+     * @param linspaceInterval length/step of each reiman rectangle on the
      *                         x-axis-interval, such
      *                         as 0.002 or 1.
      * @return the approximated definite integral, for a better approximation,
-     *         reduce the linespaceInterval number closer to 0, however this will slow down execution if too low of linspace.
+     *         reduce the linespaceInterval number closer to 0, however this will
+     *         slow down execution if too low of linspace.
      */
     public static double reimanSumIntegral(Function<Double, Double> function, int[] interval, double linspaceInterval) {
 
@@ -479,18 +470,18 @@ public class Matrix {
                 if (!Double.isNaN(y)) {
                     sum += linspaceInterval * y;
                 } else {
-                    throw new RuntimeException (
-                            y+"invalid interval, a jump, infinite, or other discontinouty invalidates this interval, use a continous interval");
+                    throw new RuntimeException(
+                            y + "invalid interval, a jump, infinite, or other discontinouty invalidates this interval, use a continous interval");
                 }
             }
         } catch (ArithmeticException e) {
-            System.out.println(e+"invald interval, some kind of discontinuity in the function");
+            System.out.println(e + "invald interval, some kind of discontinuity in the function");
         }
         return sum;
     }
 
     public static void main(String[] args) throws IOException {
-        Function<Double, Double> fx = x -> Math.pow(x,2);
+        Function<Double, Double> fx = x -> Math.pow(x, 2);
         int[] interval = { 0, 5 };
         double step = 0.00001;
 
