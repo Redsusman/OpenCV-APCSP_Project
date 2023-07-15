@@ -1,11 +1,13 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Matrix{
+public class Matrix {
 
     public double[][] baseMatrix;
     public int rows;
@@ -480,16 +482,31 @@ public class Matrix{
         }
         return sum;
     }
+
     /**
      * 
      * @param function
-     * @param x point to be evaluated
-     * @param h width of slope, set closer to 0. for small number notation, use 1E-n notation
-     * @return derivative (d/dx with respect to f(x)) calculated by the difference quotient: (f(x+h) - f(x))/h
+     * @param x        point to be evaluated
+     * @param h        width of slope, set closer to 0. for small number notation,
+     *                 use 1E-n notation
+     * @return derivative (d/dx with respect to f(x)) calculated by the difference
+     *         quotient: (f(x+h) - f(x))/h
      */
     public static double derivative(Function<Double, Double> function, double x, double h) {
-        double retDerivative = (function.apply(x+h) - function.apply(x))/h;
+        double retDerivative = (function.apply(x + h) - function.apply(x)) / h;
         return retDerivative;
+    }
+
+    private static double newton(Function<Double, Double> function, double x) {
+        double approx = x - (function.apply(x) / derivative(function, x, 1E-10));
+        return approx;
+    }
+
+    private static double newtonZero(Function<Double, Double> function, double x) {
+        do {
+            x = newton(function, x);
+        } while (Math.abs(function.apply(x)) > 0.000000000001 );
+        return x;
     }
 
     /**
@@ -497,22 +514,35 @@ public class Matrix{
      * @param function nth degree polynomial.
      * @return zeros approximated by Newton-Rasphon method.
      */
-    public static double zeros(Function<Double, Double> function) {
-        return 0;
+    public static ArrayList<Double> zeros(Function<Double, Double> function) {
+        ArrayList<Double> xList = new ArrayList<>();
+        ArrayList<Double> approxRoots = new ArrayList<>();
+
+        for (double i = -100; i < 100; i++) {
+            double y = function.apply(i);
+            if (Math.signum(y) != Math.signum(function.apply(i + 1))) {
+                xList.add(i);
+            }
+        }
+
+
+        for (var x : xList) {
+            approxRoots.add(newtonZero(function, x));
+        }
+
+
+        return approxRoots;
     }
 
-    public double[] regression (double[] xList, double[] yList, int power) {
+    public double[] regression(double[] xList, double[] yList, int power) {
         double[] retCoefficents = new double[power];
         return retCoefficents;
     }
 
     public static void main(String[] args) throws IOException {
-        Function<Double, Double> fx = x -> Math.sqrt(25-Math.pow(x,2));
-        int[] x = {-5, 5};
-        double h = 0.002;
-
-        var ret = Matrix.reimanSumIntegral(fx, x, h);
-        System.out.println(ret);
+        Function<Double, Double> fx = x -> Math.pow(x,2) +2;
+        ArrayList<Double> zeros = Matrix.zeros(fx);
+        System.out.println(zeros);
 
     }
 
