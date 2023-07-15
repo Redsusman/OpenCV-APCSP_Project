@@ -161,6 +161,7 @@ def correctRotation(measurement, tvec, cap, poseInliers, minKalmanInliers, jacob
         kalman_filter.statePre = statePre
         kalman_filter.statePost = statePost
         
+        
 
         for _ in range(5000):
             prediction = kalman_filter.predict()

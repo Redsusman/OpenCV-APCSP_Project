@@ -2,9 +2,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
-public class Matrix {
+public class Matrix{
 
     public double[][] baseMatrix;
     public int rows;
@@ -479,13 +480,38 @@ public class Matrix {
         }
         return sum;
     }
+    /**
+     * 
+     * @param function
+     * @param x point to be evaluated
+     * @param h width of slope, set closer to 0. for small number notation, use 1E-n notation
+     * @return derivative (d/dx with respect to f(x)) calculated by the difference quotient: (f(x+h) - f(x))/h
+     */
+    public static double derivative(Function<Double, Double> function, double x, double h) {
+        double retDerivative = (function.apply(x+h) - function.apply(x))/h;
+        return retDerivative;
+    }
+
+    /**
+     * 
+     * @param function nth degree polynomial.
+     * @return zeros approximated by Newton-Rasphon method.
+     */
+    public static double zeros(Function<Double, Double> function) {
+        return 0;
+    }
+
+    public double[] regression (double[] xList, double[] yList, int power) {
+        double[] retCoefficents = new double[power];
+        return retCoefficents;
+    }
 
     public static void main(String[] args) throws IOException {
-        Function<Double, Double> fx = x -> Math.pow(x, 2);
-        int[] interval = { 0, 5 };
-        double step = 0.00001;
+        Function<Double, Double> fx = x -> Math.sqrt(25-Math.pow(x,2));
+        int[] x = {-5, 5};
+        double h = 0.002;
 
-        var ret = Matrix.reimanSumIntegral(fx, interval, step);
+        var ret = Matrix.reimanSumIntegral(fx, x, h);
         System.out.println(ret);
 
     }
