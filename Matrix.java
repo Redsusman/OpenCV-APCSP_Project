@@ -1,11 +1,16 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public class Matrix {
 
@@ -505,7 +510,7 @@ public class Matrix {
     private static double newtonZero(Function<Double, Double> function, double x) {
         do {
             x = newton(function, x);
-        } while (Math.abs(function.apply(x)) > 0.000000000001 );
+        } while (Math.abs(function.apply(x)) > 0.000000000001);
         return x;
     }
 
@@ -527,9 +532,11 @@ public class Matrix {
         for (var x : xList) {
             approxRoots.add(newtonZero(function, x));
         }
-
-
-        return approxRoots;
+        Set<Double> convertApprox = new HashSet<>();
+        convertApprox.addAll(approxRoots);
+        ArrayList<Double> reconvert = new ArrayList<>(convertApprox);
+        Collections.sort(reconvert);
+        return reconvert;
     }
 
     public double[] regression(double[] xList, double[] yList, int power) {
@@ -538,8 +545,9 @@ public class Matrix {
     }
 
     public static void main(String[] args) throws IOException {
-        Function<Double, Double> fx = x -> Math.pow(x,4) - 9*Math.pow(x,3) + 48*Math.pow(x,2) - 78*x - 136;
-        ArrayList<Double> zeros = Matrix.zeros(fx);
+        // 4x^4 - 9x^3 + 2x^2 - 8x + 3
+        Function<Double, Double> fx = x -> Math.sin(x);
+        ArrayList<Double> zeros = zeros(fx);
         System.out.println(zeros);
 
     }
