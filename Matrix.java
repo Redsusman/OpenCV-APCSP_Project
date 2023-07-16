@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -6,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -510,14 +513,16 @@ public class Matrix {
     private static double newtonZero(Function<Double, Double> function, double x) {
         do {
             x = newton(function, x);
-        } while (Math.abs(function.apply(x)) > 0.000000000001);
+        } while (Math.abs(function.apply(x)) > 1E-10);
         return x;
     }
+
+    
 
     /**
      * 
      * @param function nth degree polynomial.
-     * @return zeros approximated by Newton-Rasphon method.
+     * @return zeros approximated by the Newton-Rasphon method.
      */
     public static ArrayList<Double> zeros(Function<Double, Double> function) {
         ArrayList<Double> xList = new ArrayList<>();
@@ -527,11 +532,16 @@ public class Matrix {
             double y = function.apply(i);
             if (Math.signum(y) != Math.signum(function.apply(i + 1))) {
                 xList.add(i);
+                xList.add(i+1);  
             }
         }
         for (var x : xList) {
             approxRoots.add(newtonZero(function, x));
         }
+        //filter the set for possible solutions close to 0;
+        approxRoots.removeIf(x -> Math.abs(x) < 0.001 && function.apply(x) != 0.0);
+        
+        //hashsets remove/filter double solutions
         Set<Double> convertApprox = new HashSet<>();
         convertApprox.addAll(approxRoots);
         ArrayList<Double> reconvert = new ArrayList<>(convertApprox);
@@ -546,9 +556,10 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         // 4x^4 - 9x^3 + 2x^2 - 8x + 3
-        Function<Double, Double> fx = x -> Math.sin(x);
+        Function<Double, Double> fx = x -> Math.pow(x,5) - 5*Math.pow(x,3);
         ArrayList<Double> zeros = zeros(fx);
         System.out.println(zeros);
+        
 
     }
 
