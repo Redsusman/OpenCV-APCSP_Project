@@ -487,7 +487,7 @@ public class Matrix {
      * 
      * @param function
      * @param x        point to be evaluated
-     * @param h        width of slope, set closer to 0. for small number notation,
+     * @param h        width of slope, set closer to 0. For small number notation,
      *                 use 1E-n notation
      * @return derivative (d/dx with respect to f(x)) calculated by the difference
      *         quotient: (f(x+h) - f(x))/h
@@ -524,8 +524,6 @@ public class Matrix {
                 xList.add(i);
             }
         }
-
-
         for (var x : xList) {
             approxRoots.add(newtonZero(function, x));
         }
@@ -540,7 +538,7 @@ public class Matrix {
     }
 
     public static void main(String[] args) throws IOException {
-        Function<Double, Double> fx = x -> Math.pow(x,2) +2;
+        Function<Double, Double> fx = x -> Math.pow(x,4) - 9*Math.pow(x,3) + 48*Math.pow(x,2) - 78*x - 136;
         ArrayList<Double> zeros = Matrix.zeros(fx);
         System.out.println(zeros);
 
