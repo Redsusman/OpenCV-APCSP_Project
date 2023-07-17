@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
@@ -14,6 +16,9 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class Matrix {
 
@@ -517,7 +522,48 @@ public class Matrix {
         return x;
     }
 
-    
+    private static Map<Integer, List<String>> cleanZeros(ArrayList<Double> possibleZeros) {
+        // int arrayCount = 0;
+        // Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new HashMap<>());
+        // List<String> strList = Collections.synchronizedList(new ArrayList<>());
+        // possibleZeros = (ArrayList<Double>) Collections.synchronizedList(possibleZeros);
+        // possibleZeros.forEach(number -> strList.add(Double.toString(number)));
+
+        Thread thread = new Thread(() -> {
+        int arrayCount = 0;
+        Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new HashMap<>());
+        List<String> strList = Collections.synchronizedList(new ArrayList<>());
+        possibleZeros = (ArrayList<Double>) Collections.synchronizedList(possibleZeros);
+        possibleZeros.forEach(number -> strList.add(Double.toString(number)));
+            for (int i = 0; i < possibleZeros.size() - 1; i++) {
+                Thread secondLoop = new Thread(() -> {
+                    for (int j = 0; j < 4; j++) {
+                        if (Character.compare(strList.get(i).charAt(j), strList.get(i + 1).charAt(j)) == 0) {
+                            arrayCount++;
+                            groupedZeros.put(arrayCount, new ArrayList<String>());
+                            groupedZeros.get(arrayCount).add(strList.get(i));
+                            groupedZeros.get(arrayCount).add(strList.get(i + 1));
+                            break;
+                        }
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        groupedZeros
+                .forEach((a, b) -> b.stream().mapToDouble(Double::parseDouble).boxed().collect(Collectors.toList()));
+        return groupedZeros;
+    }
 
     /**
      * 
@@ -532,16 +578,20 @@ public class Matrix {
             double y = function.apply(i);
             if (Math.signum(y) != Math.signum(function.apply(i + 1))) {
                 xList.add(i);
-                xList.add(i+1);  
+                xList.add(i + 1);
             }
         }
         for (var x : xList) {
             approxRoots.add(newtonZero(function, x));
         }
-        //filter the set for possible solutions close to 0;
-        approxRoots.removeIf(x -> Math.abs(x) < 0.001 && function.apply(x) != 0.0);
-        
-        //hashsets remove/filter double solutions
+        // filter system for set of "solutions";
+        approxRoots.removeIf(x -> Math.abs(x) < 0.001 && function.apply(x) != 0.0 || Double.isNaN(x)
+                || Double.isInfinite(x) || Math.abs(function.apply(x)) > 1 || Double.isNaN(function.apply(x))
+                || Double.isInfinite(function.apply(x)));
+
+        List<String> strList = new ArrayList<String>();
+        approxRoots.forEach(number -> strList.add(Double.toString(number)));
+        // hashsets remove/filter double solutions
         Set<Double> convertApprox = new HashSet<>();
         convertApprox.addAll(approxRoots);
         ArrayList<Double> reconvert = new ArrayList<>(convertApprox);
@@ -556,10 +606,17 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         // 4x^4 - 9x^3 + 2x^2 - 8x + 3
-        Function<Double, Double> fx = x -> Math.pow(x,5) - 5*Math.pow(x,3);
-        ArrayList<Double> zeros = zeros(fx);
-        System.out.println(zeros);
-        
+
+        ArrayList<Double> list = new ArrayList<>() {
+            {
+                add(1.7771);
+                add(1.7772);
+                add(2.77771);
+
+            }
+        };
+
+        System.out.println(cleanZeros(list));
 
     }
 
