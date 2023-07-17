@@ -522,18 +522,20 @@ public class Matrix {
         return x;
     }
 
-    private static Map<Integer, List<String>> cleanZeros(ArrayList<Double> possibleZeros) {
+    private static Map<Integer, List<String>> cleanZeros(ArrayList<Double> possibleZeros) throws InterruptedException {
         // int arrayCount = 0;
-        // Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new HashMap<>());
+        // Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new
+        // HashMap<>());
         // List<String> strList = Collections.synchronizedList(new ArrayList<>());
-        // possibleZeros = (ArrayList<Double>) Collections.synchronizedList(possibleZeros);
+        // possibleZeros = (ArrayList<Double>)
+        // Collections.synchronizedList(possibleZeros);
         // possibleZeros.forEach(number -> strList.add(Double.toString(number)));
         possibleZeros = (ArrayList<Double>) Collections.synchronizedList(possibleZeros);
 
         Thread thread = new Thread(() -> {
-        Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new HashMap<>());
-        List<String> strList = Collections.synchronizedList(new ArrayList<>());
-        possibleZeros.forEach(number -> strList.add(Double.toString(number)));
+            Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new HashMap<>());
+            List<String> strList = Collections.synchronizedList(new ArrayList<>());
+            possibleZeros.forEach(number -> strList.add(Double.toString(number)));
             for (int i = 0; i < possibleZeros.size() - 1; i++) {
                 Thread secondLoop = new Thread(() -> {
                     for (int j = 0; j < 4; j++) {
@@ -552,14 +554,19 @@ public class Matrix {
                         }
                     }
                 });
+                secondLoop.start();
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            groupedZeros.forEach((a,b) -> b.stream().mapToDouble(Double::parseDouble).boxed().collect(Collectors.toList()));
+            groupedZeros.forEach(
+                    (a, b) -> b.stream().mapToDouble(Double::parseDouble).boxed().collect(Collectors.toList()));
         });
+        thread.start();
+
+        thread.join();
 
     }
 
