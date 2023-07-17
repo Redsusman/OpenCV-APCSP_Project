@@ -522,29 +522,27 @@ public class Matrix {
         return x;
     }
 
-    private static Map<Integer, List<String>> cleanZeros(ArrayList<Double> possibleZeros) throws InterruptedException {
-        // int arrayCount = 0;
-        // Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new
-        // HashMap<>());
-        // List<String> strList = Collections.synchronizedList(new ArrayList<>());
-        // possibleZeros = (ArrayList<Double>)
-        // Collections.synchronizedList(possibleZeros);
-        // possibleZeros.forEach(number -> strList.add(Double.toString(number)));
-        possibleZeros = (ArrayList<Double>) Collections.synchronizedList(possibleZeros);
+    private static void cleanZeros(ArrayList<Double> possibleZeros) throws InterruptedException {
 
+        ArrayList<Double> synchronizedPossibleZeros = new ArrayList<>(Collections.synchronizedList(possibleZeros));
+    
         Thread thread = new Thread(() -> {
             Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new HashMap<>());
             List<String> strList = Collections.synchronizedList(new ArrayList<>());
-            possibleZeros.forEach(number -> strList.add(Double.toString(number)));
-            for (int i = 0; i < possibleZeros.size() - 1; i++) {
+            synchronizedPossibleZeros.forEach(number -> strList.add(Double.toString(number)));
+            for (int i = 0; i < synchronizedPossibleZeros.size() - 1; i++) {
+                final int currentIndex = i; // Capture the current index as a final variable
                 Thread secondLoop = new Thread(() -> {
                     for (int j = 0; j < 4; j++) {
-                        if (Character.compare(strList.get(i).charAt(j), strList.get(i + 1).charAt(j)) == 0) {
+                        if (Character.compare(strList.get(currentIndex).charAt(j), strList.get(currentIndex + 1).charAt(j)) == 0) {
                             int arrayCount = 0;
+                            System.out.println(arrayCount);
                             arrayCount++;
-                            groupedZeros.put(arrayCount, new ArrayList<String>());
-                            groupedZeros.get(arrayCount).add(strList.get(i));
-                            groupedZeros.get(arrayCount).add(strList.get(i + 1));
+                            synchronized (groupedZeros) {
+                                groupedZeros.put(arrayCount, new ArrayList<String>());
+                                groupedZeros.get(arrayCount).add(strList.get(currentIndex));
+                                groupedZeros.get(arrayCount).add(strList.get(currentIndex + 1));
+                            }
                             break;
                         }
                         try {
@@ -556,18 +554,19 @@ public class Matrix {
                 });
                 secondLoop.start();
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
             groupedZeros.forEach(
                     (a, b) -> b.stream().mapToDouble(Double::parseDouble).boxed().collect(Collectors.toList()));
+                    System.out.println(groupedZeros);
         });
         thread.start();
 
+    
         thread.join();
-
     }
 
     /**
@@ -616,12 +615,18 @@ public class Matrix {
             {
                 add(1.7771);
                 add(1.7772);
+                add(2.7772);
                 add(2.77771);
 
             }
         };
 
-        System.out.println(cleanZeros(list));
+        try {
+            cleanZeros(list);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
     }
 
