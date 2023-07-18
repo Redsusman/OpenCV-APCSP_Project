@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.ToDoubleFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -551,15 +552,23 @@ public class Matrix {
         Collections.sort(approxRoots);
         ArrayList<Double> newer = new ArrayList<>();
         // filter system for set of "solutions";
-        approxRoots.removeIf(x -> Math.abs(x) < 0.00001 && function.apply(x) != 0.0 || Double.isNaN(x)
+        approxRoots.removeIf(x -> Double.isNaN(x)
                 || Double.isInfinite(x) || Math.abs(function.apply(x)) > 1 || Double.isNaN(function.apply(x))
                 || Double.isInfinite(function.apply(x)));
+
+        approxRoots.forEach(x -> {
+            if(Math.abs(x) < 0.001 && function.apply(x) != 0.0 ) {
+                approxRoots.set(approxRoots.indexOf(x), 0.0);
+            }
+        });
+
 
         approxRoots.forEach(arg0 -> newer.add(roundToDecimalPoint(arg0, 7)));
         List<Double> filteredList = newer.stream().distinct().toList();
 
         return filteredList;
     }
+    
 
     public double[] regression(double[] xList, double[] yList, int power) {
         double[] retCoefficents = new double[power];
@@ -568,9 +577,9 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         // 4x^4 - 9x^3 + 2x^2 - 8x + 3
-        Function<Double, Double> fx = x -> 6*Math.cos(2*x+2);
-
-        System.out.println(zeros(fx));
+        Function<Double, Double> fx = x -> x - Math.tan(x);
+        List<Double> zeros = new ArrayList<>(zeros(fx));
+        System.out.println(zeros);
 
     }
 
