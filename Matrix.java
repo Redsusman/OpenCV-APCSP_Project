@@ -555,7 +555,7 @@ public class Matrix {
                 || Double.isInfinite(x) || Math.abs(function.apply(x)) > 1 || Double.isNaN(function.apply(x))
                 || Double.isInfinite(function.apply(x)));
 
-        approxRoots.forEach(arg0 -> newer.add(roundToDecimalPoint(arg0, 9)));
+        approxRoots.forEach(arg0 -> newer.add(roundToDecimalPoint(arg0, 7)));
         List<Double> filteredList = newer.stream().distinct().toList();
 
         return filteredList;
@@ -568,7 +568,7 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         // 4x^4 - 9x^3 + 2x^2 - 8x + 3
-        Function<Double, Double> fx = x -> -Math.pow(x,6)+2*Math.pow(x,5)+2*Math.pow(x,4) - 8*Math.pow(x,2) - 8*x+16;
+        Function<Double, Double> fx = x -> 6*Math.cos(2*x+2);
 
         System.out.println(zeros(fx));
 
