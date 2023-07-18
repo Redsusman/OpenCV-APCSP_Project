@@ -537,7 +537,7 @@ public class Matrix {
         ArrayList<Double> xList = new ArrayList<>();
         ArrayList<Double> approxRoots = new ArrayList<>();
 
-        for (double i = -100; i < 100; i++) {
+        for (double i = -100; i < 100; i+=0.05) {
             double y = function.apply(i);
             if (Math.signum(y) != Math.signum(function.apply(i + 1))) {
                 xList.add(i);
@@ -551,7 +551,7 @@ public class Matrix {
         Collections.sort(approxRoots);
         ArrayList<Double> newer = new ArrayList<>();
         // filter system for set of "solutions";
-        approxRoots.removeIf(x -> Math.abs(x) < 0.001 && function.apply(x) != 0.0 || Double.isNaN(x)
+        approxRoots.removeIf(x -> Math.abs(x) < 0.00001 && function.apply(x) != 0.0 || Double.isNaN(x)
                 || Double.isInfinite(x) || Math.abs(function.apply(x)) > 1 || Double.isNaN(function.apply(x))
                 || Double.isInfinite(function.apply(x)));
 
@@ -568,14 +568,9 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         // 4x^4 - 9x^3 + 2x^2 - 8x + 3
-        Function<Double, Double> fx = x -> Math.pow(x,5) - 2*x + 2;
-        
+        Function<Double, Double> fx = x -> -Math.pow(x,6)+2*Math.pow(x,5)+2*Math.pow(x,4) - 8*Math.pow(x,2) - 8*x+16;
 
         System.out.println(zeros(fx));
-
-
-
-        
 
     }
 
