@@ -522,51 +522,10 @@ public class Matrix {
         return x;
     }
 
-    private static void cleanZeros(ArrayList<Double> possibleZeros) throws InterruptedException {
-
-        ArrayList<Double> synchronizedPossibleZeros = new ArrayList<>(Collections.synchronizedList(possibleZeros));
-    
-        Thread thread = new Thread(() -> {
-            Map<Integer, List<String>> groupedZeros = Collections.synchronizedMap(new HashMap<>());
-            List<String> strList = Collections.synchronizedList(new ArrayList<>());
-            synchronizedPossibleZeros.forEach(number -> strList.add(Double.toString(number)));
-            for (int i = 0; i < synchronizedPossibleZeros.size() - 1; i++) {
-                final int currentIndex = i; // Capture the current index as a final variable
-                Thread secondLoop = new Thread(() -> {
-                    for (int j = 0; j < 4; j++) {
-                        if (Character.compare(strList.get(currentIndex).charAt(j), strList.get(currentIndex + 1).charAt(j)) == 0) {
-                            int arrayCount = 0;
-                            System.out.println(arrayCount);
-                            arrayCount++;
-                            synchronized (groupedZeros) {
-                                groupedZeros.put(arrayCount, new ArrayList<String>());
-                                groupedZeros.get(arrayCount).add(strList.get(currentIndex));
-                                groupedZeros.get(arrayCount).add(strList.get(currentIndex + 1));
-                            }
-                            break;
-                        }
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                secondLoop.start();
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            groupedZeros.forEach(
-                    (a, b) -> b.stream().mapToDouble(Double::parseDouble).boxed().collect(Collectors.toList()));
-                    System.out.println(groupedZeros);
-        });
-        thread.start();
-
-    
-        thread.join();
+    private static double roundToDecimalPoint(double number, int decimalPoint) {
+        double powerOfTen = Math.pow(10, decimalPoint);
+        double roundedNumber = Math.round(number * powerOfTen) / powerOfTen;
+        return roundedNumber;
     }
 
     /**
@@ -574,7 +533,7 @@ public class Matrix {
      * @param function nth degree polynomial.
      * @return zeros approximated by the Newton-Rasphon method.
      */
-    public static ArrayList<Double> zeros(Function<Double, Double> function) {
+    public static List<Double> zeros(Function<Double, Double> function) {
         ArrayList<Double> xList = new ArrayList<>();
         ArrayList<Double> approxRoots = new ArrayList<>();
 
@@ -588,19 +547,18 @@ public class Matrix {
         for (var x : xList) {
             approxRoots.add(newtonZero(function, x));
         }
+
+        Collections.sort(approxRoots);
+        ArrayList<Double> newer = new ArrayList<>();
         // filter system for set of "solutions";
         approxRoots.removeIf(x -> Math.abs(x) < 0.001 && function.apply(x) != 0.0 || Double.isNaN(x)
                 || Double.isInfinite(x) || Math.abs(function.apply(x)) > 1 || Double.isNaN(function.apply(x))
                 || Double.isInfinite(function.apply(x)));
 
-        List<String> strList = new ArrayList<String>();
-        approxRoots.forEach(number -> strList.add(Double.toString(number)));
-        // hashsets remove/filter double solutions
-        Set<Double> convertApprox = new HashSet<>();
-        convertApprox.addAll(approxRoots);
-        ArrayList<Double> reconvert = new ArrayList<>(convertApprox);
-        Collections.sort(reconvert);
-        return reconvert;
+        approxRoots.forEach(arg0 -> newer.add(roundToDecimalPoint(arg0, 9)));
+        List<Double> filteredList = newer.stream().distinct().toList();
+
+        return filteredList;
     }
 
     public double[] regression(double[] xList, double[] yList, int power) {
@@ -610,23 +568,14 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         // 4x^4 - 9x^3 + 2x^2 - 8x + 3
+        Function<Double, Double> fx = x -> Math.pow(x,5) - 2*x + 2;
+        
 
-        ArrayList<Double> list = new ArrayList<>() {
-            {
-                add(1.7771);
-                add(1.7772);
-                add(2.7772);
-                add(2.77771);
+        System.out.println(zeros(fx));
 
-            }
-        };
 
-        try {
-            cleanZeros(list);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
+        
 
     }
 
