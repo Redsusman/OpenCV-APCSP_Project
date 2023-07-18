@@ -538,7 +538,7 @@ public class Matrix {
         ArrayList<Double> xList = new ArrayList<>();
         ArrayList<Double> approxRoots = new ArrayList<>();
 
-        for (double i = -100; i < 100; i+=0.05) {
+        for (double i = -100; i < 100; i += 0.05) {
             double y = function.apply(i);
             if (Math.signum(y) != Math.signum(function.apply(i + 1))) {
                 xList.add(i);
@@ -557,18 +557,16 @@ public class Matrix {
                 || Double.isInfinite(function.apply(x)));
 
         approxRoots.forEach(x -> {
-            if(Math.abs(x) < 0.001 && function.apply(x) != 0.0 ) {
+            if (Math.abs(x) < 0.001 && function.apply(x) != 0.0) {
                 approxRoots.set(approxRoots.indexOf(x), 0.0);
             }
         });
-
 
         approxRoots.forEach(arg0 -> newer.add(roundToDecimalPoint(arg0, 7)));
         List<Double> filteredList = newer.stream().distinct().toList();
 
         return filteredList;
     }
-    
 
     public double[] regression(double[] xList, double[] yList, int power) {
         double[] retCoefficents = new double[power];
