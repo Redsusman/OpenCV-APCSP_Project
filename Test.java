@@ -1,31 +1,33 @@
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 public class Test {
-    public static void main(String[] args) {
-        Thread loop = new Thread(() -> {
-            for (int i = 0; i < 10; i++) {
-                Thread secondLoop = new Thread(() -> {
-                    for (int j = 0; j < 10; j++) {
-                        System.out.println(j);
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                System.out.println(i);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                secondLoop.start();
-            }
-        });
-        loop.start();
-    }
+    public static void main(String[] args) throws IOException {
+        File file = new File("file.csv");
+        file.createNewFile();
 
+        ArrayList<String[]> dataStream = new ArrayList<>() {{
+            add(new String[] {"John", "Doe", "1987"});
+            add(new String[] {"Mary", "Rose", "1942"});
+            add(new String[] {"John", "Clark", "2012"});
+        }};
+
+        try (PrintWriter writer = new PrintWriter(file)) {
+            for (String[] data : dataStream) {
+                StringBuilder line = new StringBuilder();
+                for (int i = 0; i < data.length; i++) {
+                    line.append(data[i]);
+                    if (i < data.length - 1) {
+                        line.append(",");
+                    }
+                }
+                writer.write(line.toString() + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

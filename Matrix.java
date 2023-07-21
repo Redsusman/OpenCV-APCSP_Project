@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect.Type;
 import java.math.BigDecimal;
+import java.nio.channels.NetworkChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
@@ -379,37 +381,9 @@ public class Matrix {
     }
 
     public ArrayList<Matrix> cofactor(Matrix matrix) throws IOException {
-
         ArrayList<Matrix> storedPossibilites = new ArrayList<>();
         int rowCheck = 0;
         int rowChecker = matrix.rows - rowCheck;
-
-        for (int i = 0; i < matrix.rows; i++) {
-            rowCheck++;
-            for (int j = 0; j < matrix.columns; j++) {
-                Matrix possibility = new Matrix(matrix.rows - 1, matrix.columns - 1);
-                ArrayList<Double> list = new ArrayList<>();
-                if ((matrix.baseMatrix[i][j] != matrix.baseMatrix[0][j])
-                        && (matrix.baseMatrix[i][j] != matrix.baseMatrix[i][i])) {
-                    list.add(matrix.baseMatrix[i][j]);
-                    double[] doubleList = list.stream().mapToDouble(Double::doubleValue).toArray();
-                    possibility.fill(possibility, doubleList);
-                }
-                storedPossibilites.add(possibility);
-                if (storedPossibilites.get(storedPossibilites.size() - 1).rows != 2) {
-                    for (Matrix possibilit : storedPossibilites) {
-                        if (possibilit.rows == rowChecker) {
-                            return cofactor(possibilit);
-                        } else if (rowChecker == 0) {
-                            break;
-
-                        }
-                    }
-                }
-            }
-
-        }
-
         return storedPossibilites;
     }
 
@@ -538,7 +512,7 @@ public class Matrix {
         ArrayList<Double> xList = new ArrayList<>();
         ArrayList<Double> approxRoots = new ArrayList<>();
 
-        for (double i = -100; i < 100; i += 0.05) {
+        for (double i = -100; i < 100; i += 0.25) {
             double y = function.apply(i);
             if (Math.signum(y) != Math.signum(function.apply(i + 1))) {
                 xList.add(i);
@@ -551,7 +525,7 @@ public class Matrix {
 
         Collections.sort(approxRoots);
         ArrayList<Double> newer = new ArrayList<>();
-        // filter system for set of "solutions";
+
         approxRoots.removeIf(x -> Double.isNaN(x)
                 || Double.isInfinite(x) || Math.abs(function.apply(x)) > 1 || Double.isNaN(function.apply(x))
                 || Double.isInfinite(function.apply(x)));
@@ -575,9 +549,9 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         // 4x^4 - 9x^3 + 2x^2 - 8x + 3
-        Function<Double, Double> fx = x -> x - Math.tan(x);
-        List<Double> zeros = new ArrayList<>(zeros(fx));
-        System.out.println(zeros);
+        Function<Double, Double> fx = x -> Math.sinh(x);
+        int[] range = {2,10};
+        System.out.println(zeros(fx));
 
     }
 
