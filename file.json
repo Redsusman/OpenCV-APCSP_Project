@@ -1,0 +1,22 @@
+{
+    "message_data": {
+      "event_key": "2014necmp",
+      "match_key": "2014necmp_f1m1",
+      "event_name": "New England FRC Region Championship",
+      "team_keys": [
+        "frc195",
+        "frc558",
+        "frc5122",
+        "frc177",
+        "frc230",
+        "frc4055"
+      ],
+      "scheduled_time": 1397330280,
+      "predicted_time": 1397330280,
+      "webcast": {
+        "type": "twitch",
+        "channel": "nefirst_blue"
+      }
+    },
+    "message_type": "upcoming_match"
+  }

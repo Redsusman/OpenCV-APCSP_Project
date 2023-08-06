@@ -549,7 +549,7 @@ public class Matrix {
 
     public static void main(String[] args) throws IOException {
         // 4x^4 - 9x^3 + 2x^2 - 8x + 3
-        Function<Double, Double> fx = x -> Math.sinh(x);
+        Function<Double, Double> fx = x -> 0.33333333333333333*x-6;
         int[] range = {2,10};
         System.out.println(zeros(fx));
 
